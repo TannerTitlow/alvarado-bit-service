@@ -136,9 +136,3 @@ Required environment variables:
 ## 📄 License
 
 This project is proprietary and confidential. Unauthorized copying or distribution of this project's files, via any medium, is strictly prohibited.
-
-## 📞 Contact
-
-Alvarado Bit Service - [contact information]
-
-Project Link: [https://github.com/your-username/alvarado-bit-service](https://github.com/your-username/alvarado-bit-service)
