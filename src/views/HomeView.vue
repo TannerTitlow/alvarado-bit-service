@@ -324,18 +324,6 @@ main {
 
 /* Mobile screens */
 @media (max-width: 767px) {
-  .hero h1 {
-    font-size: 2.5rem;
-  }
-
-  .hero p {
-    font-size: 1.25rem;
-  }
-
-  .cta-buttons {
-    flex-direction: column;
-  }
-
   .features {
     grid-template-columns: 1fr;
     padding: 2rem 1rem;
@@ -348,6 +336,71 @@ main {
 
   .feature h3 {
     font-size: 1.25rem;
+  }
+
+  .hero {
+    min-height: 100svh; /* Use small viewport height for mobile */
+    padding: 3rem 1rem 2rem; /* Add more padding top to account for header */
+  }
+
+  .hero-logo {
+    width: 200px; /* Make logo smaller on mobile */
+    height: 200px;
+    margin: 0 auto 1.5rem;
+  }
+
+  .hero h1 {
+    font-size: 2rem; /* Smaller font size for mobile */
+    margin-bottom: 1rem;
+  }
+
+  .hero p {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 0 0.5rem;
+  }
+
+  .video-container {
+    /* Add a fallback background color or gradient for mobile */
+    background: linear-gradient(rgba(27, 43, 82, 0.9), rgba(27, 43, 82, 0.9));
+  }
+
+  .hero-video {
+    /* Ensure video covers entire container on mobile */
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .overlay {
+    background: rgba(27, 43, 82, 0.8); /* Slightly darker overlay for mobile */
+  }
+
+  .cta-buttons {
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0 1rem;
+  }
+
+  .cta-primary,
+  .cta-secondary {
+    width: 100%; /* Full width buttons on mobile */
+    padding: 0.875rem 1.5rem;
+  }
+}
+
+/* Add iPhone-specific fixes */
+@media screen and (device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) {
+  .hero {
+    height: 100svh;
+    min-height: -webkit-fill-available;
+  }
+}
+
+/* Additional safeguard for iOS */
+@supports (-webkit-touch-callout: none) {
+  .hero {
+    min-height: -webkit-fill-available;
   }
 }
 </style>
