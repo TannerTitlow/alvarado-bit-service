@@ -1,0 +1,53 @@
+@import './fonts.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  color: #2c3e50;
+  background: #ffffff;
+  font-family: var(--font-primary);
+  font-weight: var(--fw-regular);
+  line-height: var(--leading-normal);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#app {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Common text styles */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-primary);
+  font-weight: var(--fw-bold);
+  line-height: var(--leading-tight);
+}
+
+p {
+  font-family: var(--font-secondary);
+  font-weight: var(--fw-regular);
+  line-height: var(--leading-relaxed);
+}
+
+/* Global Variables */
+:root {
+  --navy-blue: #1b2b52;
+  --patriot-red: #b22234;
+  --steel-gray: #707070;
+  --pure-white: #ffffff;
+}
