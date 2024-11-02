@@ -1,5 +1,7 @@
 <script setup>
 import { onMounted } from 'vue'
+const videoSrc = new URL('@/assets/videos/abs-2023-mobile.mp4', import.meta.url)
+  .href
 
 onMounted(() => {
   document.title = 'Alvarado Bit Service | American-Made Water Well Drill Bits'
@@ -17,7 +19,7 @@ onMounted(() => {
     <section class="hero">
       <div class="video-container">
         <video autoplay loop muted playsinline class="hero-video">
-          <source src="@/assets/videos/abs-2023-mobile.mp4" type="video/mp4" />
+          <source :src="videoSrc" type="video/mp4" />
         </video>
         <div class="overlay"></div>
       </div>
