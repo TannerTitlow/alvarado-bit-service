@@ -17,7 +17,7 @@ onMounted(() => {
     <section class="hero">
       <div class="video-container">
         <video autoplay loop muted playsinline class="hero-video">
-          <source src="@/assets/videos/abs-2023.mp4" type="video/mp4" />
+          <source src="@/assets/videos/abs-2023-mobile.mp4" type="video/mp4" />
         </video>
         <div class="overlay"></div>
       </div>
@@ -360,20 +360,11 @@ main {
     padding: 0 0.5rem;
   }
 
-  .video-container {
-    /* Add a fallback background color or gradient for mobile */
-    background: linear-gradient(rgba(27, 43, 82, 0.9), rgba(27, 43, 82, 0.9));
-  }
-
   .hero-video {
     /* Ensure video covers entire container on mobile */
     width: 100%;
     height: 100%;
     object-fit: cover;
-  }
-
-  .overlay {
-    background: rgba(27, 43, 82, 0.8); /* Slightly darker overlay for mobile */
   }
 
   .cta-buttons {

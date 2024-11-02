@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import AboutView from '../views/AboutView.vue'
@@ -47,6 +48,13 @@ const router = createRouter({
       beforeEnter: requireAuth,
     },
   ],
+  scrollBehavior(to, from, savedPosition) {
+    // Always scroll to top when changing routes
+    return { top: 0, behavior: 'smooth' }
+
+    // Or if you want to use saved positions when using browser back/forward:
+    // return savedPosition || { top: 0, behavior: 'smooth' }
+  },
 })
 
 export default router
