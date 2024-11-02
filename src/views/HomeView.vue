@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted } from 'vue'
+
 const videoSrc = new URL('@/assets/videos/abs-2023-mobile.mp4', import.meta.url)
   .href
 
@@ -11,20 +12,6 @@ onMounted(() => {
       'content',
       'Family-owned excellence in drilling since 1976. Specialized in manufacturing, selling, and repairing water well drill bits with nationwide 24/7 service.',
     )
-
-  const video = document.querySelector('.hero-video')
-
-  // Force video play on mobile
-  video.play().catch(error => {
-    console.log('Video autoplay failed:', error)
-  })
-
-  // Handle visibility change (when user switches tabs)
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') {
-      video.play().catch(() => {})
-    }
-  })
 })
 </script>
 
@@ -37,8 +24,6 @@ onMounted(() => {
           loop
           muted
           playsinline
-          preload="metadata"
-          defaultMuted
           class="hero-video"
           :src="videoSrc"
         ></video>
@@ -197,13 +182,8 @@ main {
   width: auto;
   height: auto;
   transform: translate(-50%, -50%);
+  -webkit-transform: translate(-50%, -50%);
   object-fit: cover;
-  z-index: 0;
-  -webkit-transform: translateX(-50%) translateY(-50%);
-  -moz-transform: translateX(-50%) translateY(-50%);
-  -webkit-transform-style: preserve-3d;
-  transform-style: preserve-3d;
-  will-change: transform;
   z-index: 1;
 }
 
@@ -327,14 +307,12 @@ main {
   line-height: 1.6;
 }
 
-/* Medium screens */
 @media (min-width: 768px) {
   .features {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-/* Large screens */
 @media (min-width: 1200px) {
   .features {
     grid-template-columns: repeat(4, 1fr);
@@ -353,7 +331,6 @@ main {
   }
 }
 
-/* Mobile screens */
 @media (max-width: 767px) {
   .features {
     grid-template-columns: 1fr;
@@ -370,18 +347,18 @@ main {
   }
 
   .hero {
-    min-height: 100svh; /* Use small viewport height for mobile */
-    padding: 3rem 1rem 2rem; /* Add more padding top to account for header */
+    min-height: 100svh;
+    padding: 3rem 1rem 2rem;
   }
 
   .hero-logo {
-    width: 200px; /* Make logo smaller on mobile */
+    width: 200px;
     height: 200px;
     margin: 0 auto 1.5rem;
   }
 
   .hero h1 {
-    font-size: 2rem; /* Smaller font size for mobile */
+    font-size: 2rem;
     margin-bottom: 1rem;
   }
 
@@ -389,13 +366,6 @@ main {
     font-size: 1rem;
     margin-bottom: 1.5rem;
     padding: 0 0.5rem;
-  }
-
-  .hero-video {
-    /* Ensure video covers entire container on mobile */
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
   }
 
   .cta-buttons {
@@ -406,12 +376,11 @@ main {
 
   .cta-primary,
   .cta-secondary {
-    width: 100%; /* Full width buttons on mobile */
+    width: 100%;
     padding: 0.875rem 1.5rem;
   }
 }
 
-/* Add iPhone-specific fixes */
 @media screen and (device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) {
   .hero {
     height: 100svh;
@@ -419,7 +388,6 @@ main {
   }
 }
 
-/* Additional safeguard for iOS */
 @supports (-webkit-touch-callout: none) {
   .hero {
     min-height: -webkit-fill-available;
