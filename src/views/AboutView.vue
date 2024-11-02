@@ -140,6 +140,11 @@ onMounted(() => {
             commitment to quality and customer service has built lasting
             relationships across the United States.
           </p>
+          <div class="cta-wrapper">
+            <RouterLink to="/contact" class="cta-primary"
+              >Get in Touch</RouterLink
+            >
+          </div>
         </div>
       </div>
     </section>
@@ -207,6 +212,25 @@ onMounted(() => {
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 2rem;
   margin-top: 2rem;
+}
+
+.cta-wrapper {
+  margin-top: 2rem;
+}
+
+.cta-primary {
+  display: inline-block;
+  padding: 0.75rem 2rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  background-color: var(--patriot-red);
+  color: var(--pure-white);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.cta-primary:hover {
+  background-color: #8b1a28;
 }
 
 .highlight-card {
@@ -380,9 +404,14 @@ onMounted(() => {
 .testimonial-section p {
   color: var(--steel-gray);
   line-height: 1.6;
+  margin-bottom: 1.5rem;
 }
 
 @media (max-width: 768px) {
+  .about {
+    padding-top: 109px; /* Increased padding for two-line mobile nav */
+  }
+
   .about-hero {
     padding: 4rem 1rem;
   }

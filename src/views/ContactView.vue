@@ -416,6 +416,10 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
+  .contact {
+    padding-top: 109px; /* Increased padding for two-line mobile nav */
+  }
+
   .contact-hero {
     padding: 4rem 1rem;
   }
