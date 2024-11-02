@@ -1,6 +1,26 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import { supabase } from '@/lib/supabaseClient'
 import './assets/fonts.css'
+
+const session = ref(null)
+
+// Check and update session state
+async function getSession() {
+  const { data } = await supabase.auth.getSession()
+  session.value = data.session
+}
+
+// Listen for auth state changes
+onMounted(() => {
+  getSession()
+
+  // Set up auth state listener
+  supabase.auth.onAuthStateChange((_event, _session) => {
+    session.value = _session
+  })
+})
 </script>
 
 <template>
@@ -17,6 +37,9 @@ import './assets/fonts.css'
           <RouterLink to="/" class="nav-link">Home</RouterLink>
           <RouterLink to="/about" class="nav-link">About</RouterLink>
           <RouterLink to="/contact" class="nav-link">Contact</RouterLink>
+          <RouterLink v-if="session" to="/admin" class="nav-link"
+            >Admin</RouterLink
+          >
         </div>
       </nav>
     </header>
