@@ -1,7 +1,9 @@
 <script setup>
 import { onMounted } from 'vue'
 
-const videoSrc = new URL('@/assets/videos/abs-2023-mobile.mp4', import.meta.url)
+const mp4Src = new URL('@/assets/videos/abs-2023-mobile.mp4', import.meta.url)
+  .href
+const webmSrc = new URL('@/assets/videos/abs-2023-mobile.webm', import.meta.url)
   .href
 
 onMounted(() => {
@@ -19,14 +21,10 @@ onMounted(() => {
   <main>
     <section class="hero">
       <div class="video-container">
-        <video
-          autoplay
-          loop
-          muted
-          playsinline
-          class="hero-video"
-          :src="videoSrc"
-        ></video>
+        <video autoplay loop muted playsinline class="hero-video">
+          <source :src="webmSrc" type="video/webm" />
+          <source :src="mp4Src" type="video/mp4" />
+        </video>
         <div class="overlay"></div>
       </div>
       <div class="hero-content">
