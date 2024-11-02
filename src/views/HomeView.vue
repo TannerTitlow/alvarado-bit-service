@@ -11,6 +11,20 @@ onMounted(() => {
       'content',
       'Family-owned excellence in drilling since 1976. Specialized in manufacturing, selling, and repairing water well drill bits with nationwide 24/7 service.',
     )
+
+  const video = document.querySelector('.hero-video')
+
+  // Force video play on mobile
+  video.play().catch(error => {
+    console.log('Video autoplay failed:', error)
+  })
+
+  // Handle visibility change (when user switches tabs)
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      video.play().catch(() => {})
+    }
+  })
 })
 </script>
 
@@ -18,9 +32,16 @@ onMounted(() => {
   <main>
     <section class="hero">
       <div class="video-container">
-        <video autoplay loop muted playsinline class="hero-video">
-          <source :src="videoSrc" type="video/mp4" />
-        </video>
+        <video
+          autoplay
+          loop
+          muted
+          playsinline
+          preload="metadata"
+          defaultMuted
+          class="hero-video"
+          :src="videoSrc"
+        ></video>
         <div class="overlay"></div>
       </div>
       <div class="hero-content">
@@ -177,6 +198,13 @@ main {
   height: auto;
   transform: translate(-50%, -50%);
   object-fit: cover;
+  z-index: 0;
+  -webkit-transform: translateX(-50%) translateY(-50%);
+  -moz-transform: translateX(-50%) translateY(-50%);
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+  will-change: transform;
+  z-index: 1;
 }
 
 .overlay {
@@ -186,11 +214,12 @@ main {
   width: 100%;
   height: 100%;
   background: rgba(27, 43, 82, 0.7);
+  z-index: 2;
 }
 
 .hero-content {
   position: relative;
-  z-index: 1;
+  z-index: 3;
   max-width: 800px;
   padding: 2rem;
 }
