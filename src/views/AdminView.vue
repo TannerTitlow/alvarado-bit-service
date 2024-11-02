@@ -248,6 +248,7 @@ onMounted(() => {
 <style scoped>
 .admin {
   padding-top: 64px;
+  padding-bottom: 2rem;
   min-height: 100vh;
   background-color: #f5f5f5;
 }
@@ -426,6 +427,10 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
+  .admin {
+    padding-top: 109px;
+  }
+
   .admin-header {
     padding: 1rem 0;
   }
