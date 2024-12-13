@@ -28,4 +28,10 @@ export default defineConfig({
     // Increase chunk size limit if needed
     chunkSizeWarningLimit: 2000,
   },
+  vue: {
+    compilerOptions: {
+      isCustomElement: tag => false,
+      whitespace: 'preserve',
+    },
+  },
 })

@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from 'vue'
 import { supabase } from '@/lib/supabaseClient'
 import ProductItem from './ProductItem.vue'
 import ProductModal from './ProductModal.vue'
+import ConfirmModal from './ConfirmModal.vue'
 
 // Replace the products ref with this:
 const products = ref([])
@@ -17,10 +18,13 @@ const showModal = ref(false)
 const editingProduct = ref(null)
 const modalMode = ref('add') // 'add' or 'edit'
 
+const showDeleteModal = ref(false)
+const deletingProductId = ref(null)
+
 // Metrics calculations
 const totalProducts = computed(() => products.value.length)
 const totalValue = computed(() =>
-  products.value.reduce((sum, product) => sum + product.price, 0)
+  products.value.reduce((sum, product) => sum + product.price, 0),
 )
 const categoryCounts = computed(() => {
   return products.value.reduce((acc, product) => {
@@ -41,9 +45,10 @@ const filteredProducts = computed(() => {
   // Search query
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(p =>
-      p.title.toLowerCase().includes(query) ||
-      p.description.toLowerCase().includes(query)
+    filtered = filtered.filter(
+      p =>
+        p.title.toLowerCase().includes(query) ||
+        p.description.toLowerCase().includes(query),
     )
   }
 
@@ -81,22 +86,24 @@ const fetchProducts = async () => {
 
     // Get signed URLs for all products
     const productsWithSignedUrls = await Promise.all(
-      data.map(async (product) => {
+      data.map(async product => {
         if (product.image_url) {
           // Extract filename from the URL
           const filename = product.image_url.split('/').pop()
 
-          const { data: { signedUrl } } = await supabase.storage
+          const {
+            data: { signedUrl },
+          } = await supabase.storage
             .from('product-images')
             .createSignedUrl(filename, 60 * 60) // 1 hour expiry
 
           return {
             ...product,
-            image_url: signedUrl
+            image_url: signedUrl,
           }
         }
         return product
-      })
+      }),
     )
 
     products.value = productsWithSignedUrls
@@ -108,7 +115,7 @@ const fetchProducts = async () => {
   }
 }
 
-const uploadImage = async (file) => {
+const uploadImage = async file => {
   try {
     const fileExt = file.name.split('.').pop()
     const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`
@@ -120,9 +127,9 @@ const uploadImage = async (file) => {
 
     if (uploadError) throw uploadError
 
-    const { data: { publicUrl } } = supabase.storage
-      .from('product-images')
-      .getPublicUrl(filePath)
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from('product-images').getPublicUrl(filePath)
 
     return publicUrl
   } catch (error) {
@@ -131,7 +138,7 @@ const uploadImage = async (file) => {
   }
 }
 
-const handleSaveProduct = async (productData) => {
+const handleSaveProduct = async productData => {
   try {
     loading.value = true
 
@@ -142,15 +149,15 @@ const handleSaveProduct = async (productData) => {
     }
 
     if (modalMode.value === 'add') {
-      const { error } = await supabase
-        .from('products')
-        .insert([{
+      const { error } = await supabase.from('products').insert([
+        {
           title: productData.title,
           description: productData.description,
           price: productData.price,
           category: productData.category,
-          image_url: productData.image_url
-        }])
+          image_url: productData.image_url,
+        },
+      ])
 
       if (error) throw error
     } else {
@@ -162,7 +169,7 @@ const handleSaveProduct = async (productData) => {
           price: productData.price,
           category: productData.category,
           image_url: productData.image_url,
-          updated_at: new Date()
+          updated_at: new Date(),
         })
         .eq('id', editingProduct.value.id)
 
@@ -179,15 +186,18 @@ const handleSaveProduct = async (productData) => {
   }
 }
 
-const handleDeleteProduct = async (productId) => {
-  if (!confirm('Are you sure you want to delete this product?')) return
+const handleDeleteProduct = productId => {
+  deletingProductId.value = productId
+  showDeleteModal.value = true
+}
 
+const confirmDelete = async () => {
   try {
     loading.value = true
     const { error } = await supabase
       .from('products')
       .delete()
-      .eq('id', productId)
+      .eq('id', deletingProductId.value)
 
     if (error) throw error
     await fetchProducts()
@@ -195,6 +205,8 @@ const handleDeleteProduct = async (productId) => {
     console.error('Error deleting product:', error)
     alert('Error deleting product')
   } finally {
+    showDeleteModal.value = false
+    deletingProductId.value = null
     loading.value = false
   }
 }
@@ -205,7 +217,7 @@ const handleAddProduct = () => {
   showModal.value = true
 }
 
-const handleEditProduct = (product) => {
+const handleEditProduct = product => {
   modalMode.value = 'edit'
   editingProduct.value = { ...product }
   showModal.value = true
@@ -235,7 +247,7 @@ onMounted(() => {
             v-model="searchQuery"
             placeholder="Search products..."
             class="search-input"
-          >
+          />
         </div>
 
         <div class="filters">
@@ -271,7 +283,11 @@ onMounted(() => {
         <div class="metric-card">
           <h3>Categories</h3>
           <div class="category-list">
-            <span v-for="(count, category) in categoryCounts" :key="category" class="category-tag">
+            <span
+              v-for="(count, category) in categoryCounts"
+              :key="category"
+              class="category-tag"
+            >
               {{ category }}: {{ count }}
             </span>
           </div>
@@ -280,9 +296,7 @@ onMounted(() => {
     </div>
 
     <!-- Loading State -->
-    <div v-if="loading" class="loading-state">
-      Loading products...
-    </div>
+    <div v-if="loading" class="loading-state">Loading products...</div>
 
     <!-- Empty State -->
     <div v-else-if="products.length === 0" class="empty-state">
@@ -307,6 +321,14 @@ onMounted(() => {
       :product="editingProduct"
       @close="showModal = false"
       @save="handleSaveProduct"
+    />
+
+    <!-- Delete Confirmation Modal -->
+    <ConfirmModal
+      v-if="showDeleteModal"
+      message="Are you sure you want to delete this product?"
+      @confirm="confirmDelete"
+      @cancel="showDeleteModal = false"
     />
   </div>
 </template>

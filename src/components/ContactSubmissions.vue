@@ -52,6 +52,8 @@ const filteredAndSortedSubmissions = computed(() => {
   // Status filter
   if (statusFilter.value !== 'all') {
     filtered = filtered.filter(s => s.status === statusFilter.value)
+  } else {
+    filtered = filtered.filter(s => s.status !== 'archived')
   }
 
   // Date range filter
@@ -113,7 +115,7 @@ const emit = defineEmits(['refresh-data'])
         <div class="filter-group">
           <label for="status">Status</label>
           <select id="status" v-model="statusFilter" class="filter-select">
-            <option value="all">All Status</option>
+            <option value="all">All</option>
             <option
               v-for="(label, value) in statusOptions"
               :key="value"

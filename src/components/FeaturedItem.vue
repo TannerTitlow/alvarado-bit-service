@@ -1,41 +1,124 @@
 <script setup>
+import { ref, defineProps, defineEmits } from 'vue'
+
 const props = defineProps({
   item: {
     type: Object,
-    required: true
+    required: true,
+    validator(value) {
+      return value.id && value.order_index !== undefined
+    },
   },
-  isDragging: {
+  index: {
+    type: Number,
+    required: true,
+  },
+  isDragged: {
     type: Boolean,
-    default: false
+    default: false,
   },
   isDragTarget: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
+  dropPosition: {
+    type: String,
+    default: null,
+  },
+  isFirst: {
+    type: Boolean,
+    default: false,
+  },
+  isLast: {
+    type: Boolean,
+    default: false,
+  },
 })
 
-const emit = defineEmits(['edit', 'delete', 'dragstart', 'dragover', 'drop'])
+const lastDragOverTime = ref(0)
+const dragHandlePressed = ref(false)
 
-const handleDragStart = (e) => {
-  // Set a translucent effect during drag
-  e.dataTransfer.effectAllowed = 'move'
+const emit = defineEmits([
+  'dragstart',
+  'dragend',
+  'dragover',
+  'edit',
+  'delete',
+  'moveUp',
+  'moveDown',
+])
 
-  // Add ghost image class and store original position
-  const rect = e.target.getBoundingClientRect()
-  e.target.classList.add('dragging')
+const handleDragStart = e => {
+  // Create a custom drag image element
+  const dragImage = document.createElement('div')
+  dragImage.style.cssText = `
+    width: 40px;
+    height: 40px;
+    background: var(--navy-blue);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  `
 
-  // Store the initial mouse offset
-  const offsetX = e.clientX - rect.left
-  const offsetY = e.clientY - rect.top
+  dragImage.innerHTML = `
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="7" r="1" fill="white" />
+      <circle cx="12" cy="12" r="1" fill="white" />
+      <circle cx="12" cy="17" r="1" fill="white" />
+      <circle cx="7" cy="7" r="1" fill="white" />
+      <circle cx="7" cy="12" r="1" fill="white" />
+      <circle cx="7" cy="17" r="1" fill="white" />
+      <circle cx="17" cy="7" r="1" fill="white" />
+      <circle cx="17" cy="12" r="1" fill="white" />
+      <circle cx="17" cy="17" r="1" fill="white" />
+    </svg>
+  `
 
-  // Set drag image offset to match cursor position
-  e.dataTransfer.setDragImage(e.target, offsetX, offsetY)
+  document.body.appendChild(dragImage)
+  e.dataTransfer.setDragImage(dragImage, 20, 20)
+  setTimeout(() => document.body.removeChild(dragImage), 0)
 
-  emit('dragstart', e)
+  emit('dragstart', props.index, props.item.id)
 }
 
-const handleDragEnd = (e) => {
-  e.target.classList.remove('dragging')
+const handleDragEnd = () => {
+  dragHandlePressed.value = false
+  emit('dragend')
+}
+
+const handleDragOver = e => {
+  e.preventDefault()
+
+  const now = Date.now()
+  if (now - lastDragOverTime.value < 50) return
+  lastDragOverTime.value = now
+
+  const rect = e.currentTarget.getBoundingClientRect()
+  const mouseY = e.clientY - rect.top
+  const isBottomHalf = mouseY > rect.height / 2
+
+  emit('dragover', {
+    index: props.index,
+    position: isBottomHalf ? 'after' : 'before',
+  })
+}
+
+const handleDragHandleMouseDown = () => {
+  dragHandlePressed.value = true
+}
+
+const handleDragHandleMouseUp = () => {
+  dragHandlePressed.value = false
+}
+
+const moveUp = () => {
+  emit('moveUp', props.index)
+}
+
+const moveDown = () => {
+  emit('moveDown', props.index)
 }
 </script>
 
@@ -43,68 +126,154 @@ const handleDragEnd = (e) => {
   <div
     class="featured-item"
     :class="{
-      'is-dragging': isDragging,
+      'is-dragged': isDragged,
       'is-drag-target': isDragTarget,
+      'drop-before': dropPosition === 'before',
+      'drop-after': dropPosition === 'after',
+      'handle-pressed': dragHandlePressed,
     }"
-    draggable="true"
-    @dragstart="handleDragStart"
-    @dragend="handleDragEnd"
-    @dragover.prevent
-    @drop="$emit('drop', $event)"
+    @dragover="handleDragOver"
+    @dragenter.prevent
   >
-    <div class="drag-handle">
-      <svg xmlns="http://www.w3.org/2000/svg" class="handle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
-      </svg>
-    </div>
-
-    <!-- Drop Target Indicator -->
-    <div class="drop-indicator">
-      <svg xmlns="http://www.w3.org/2000/svg" class="drop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-      </svg>
-      Drop here to reorder
-    </div>
-
-    <div class="media-container">
-      <img
-        v-if="item.type === 'image'"
-        :src="item.media_url"
-        :alt="item.description"
-        class="media-preview"
-      >
-      <video
-        v-else
-        :src="item.media_url"
-        class="media-preview"
-        controls
-      ></video>
-    </div>
-
     <div class="item-content">
-      <p class="item-description">{{ item.description }}</p>
-      <div class="item-metadata">
-        <span class="type-badge" :class="item.type">
-          {{ item.type }}
-        </span>
-        <span class="order-badge">
-          Order: {{ item.order_index + 1 }}
-        </span>
+      <!-- Desktop Drag Handle -->
+      <div
+        class="drag-handle desktop-only"
+        draggable="true"
+        @dragstart="handleDragStart"
+        @dragend="handleDragEnd"
+        @mousedown="handleDragHandleMouseDown"
+        @mouseup="handleDragHandleMouseUp"
+        @mouseleave="handleDragHandleMouseUp"
+        title="Drag to reorder"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="handle-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+        >
+          <circle cx="12" cy="7" r="1" fill="currentColor" />
+          <circle cx="12" cy="12" r="1" fill="currentColor" />
+          <circle cx="12" cy="17" r="1" fill="currentColor" />
+          <circle cx="7" cy="7" r="1" fill="currentColor" />
+          <circle cx="7" cy="12" r="1" fill="currentColor" />
+          <circle cx="7" cy="17" r="1" fill="currentColor" />
+          <circle cx="17" cy="7" r="1" fill="currentColor" />
+          <circle cx="17" cy="12" r="1" fill="currentColor" />
+          <circle cx="17" cy="17" r="1" fill="currentColor" />
+        </svg>
       </div>
 
-      <div class="item-actions">
-        <button @click="$emit('edit', item)" class="edit-btn">
-          <svg xmlns="http://www.w3.org/2000/svg" class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+      <!-- Mobile Reorder Controls -->
+      <div class="mobile-reorder mobile-only">
+        <button
+          class="reorder-btn up"
+          @click="moveUp"
+          :disabled="isFirst"
+          title="Move up"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="reorder-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M5 15l7-7 7 7"
+            />
           </svg>
-          Edit
         </button>
-        <button @click="$emit('delete', item.id)" class="delete-btn">
-          <svg xmlns="http://www.w3.org/2000/svg" class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+        <button
+          class="reorder-btn down"
+          @click="moveDown"
+          :disabled="isLast"
+          title="Move down"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="reorder-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
           </svg>
-          Delete
         </button>
+      </div>
+
+      <!-- Media Container -->
+      <div class="media-container">
+        <img
+          v-if="item.type === 'image'"
+          :src="item.media_url"
+          :alt="item.description"
+          class="media-preview"
+        />
+        <video
+          v-else
+          :src="item.media_url"
+          class="media-preview"
+          controls
+        ></video>
+      </div>
+
+      <!-- Item Details -->
+      <div class="item-details">
+        <p class="item-description">{{ item.description }}</p>
+        <div class="item-metadata">
+          <span class="type-badge" :class="item.type">
+            {{ item.type }}
+          </span>
+          <span class="order-badge">Order: {{ item.order_index + 1 }}</span>
+        </div>
+
+        <div class="item-actions">
+          <button @click="$emit('edit', item)" class="edit-btn">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="action-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+              />
+            </svg>
+            Edit
+          </button>
+          <button @click="$emit('delete', item.id)" class="delete-btn">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="action-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+              />
+            </svg>
+            Delete
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -115,75 +284,50 @@ const handleDragEnd = (e) => {
   background: white;
   border-radius: 0.5rem;
   overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  transform-origin: center center;
-  will-change: transform, opacity, box-shadow;
+  border: 2px solid transparent;
 }
 
-.featured-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.featured-item.is-dragging {
-  opacity: 0.7;
+.featured-item.is-dragged {
   transform: scale(1.02);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  border-color: var(--navy-blue);
+  z-index: 10;
 }
 
-.featured-item.is-drag-target {
-  position: relative;
-  transform: scale(1.02);
-  box-shadow: 0 0 0 2px var(--patriot-red);
-}
-
-.featured-item.is-drag-target::before {
-  content: '';
+.drag-handle {
   position: absolute;
-  inset: 0;
-  background: rgba(178, 34, 52, 0.1);
-  z-index: 1;
-  pointer-events: none;
-}
-
-.drop-indicator {
-  position: absolute;
-  inset: 0;
+  top: 0.75rem;
+  left: 0.75rem;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.95);
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.9);
-  color: var(--patriot-red);
-  font-weight: 500;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  z-index: 2;
-  pointer-events: none;
+  z-index: 10;
+  cursor: grab;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
-.is-drag-target .drop-indicator {
-  opacity: 1;
-}
-
-.drop-icon {
-  width: 2rem;
-  height: 2rem;
-  stroke: var(--patriot-red);
-  margin-bottom: 0.5rem;
+.is-dragged .drag-handle {
+  cursor: grabbing;
 }
 
 .handle-icon {
   width: 1.25rem;
   height: 1.25rem;
   color: var(--navy-blue);
+  pointer-events: none;
 }
 
+/* Media Container */
 .media-container {
   position: relative;
-  padding-top: 56.25%; /* 16:9 aspect ratio */
+  padding-top: 56.25%;
   background: #f3f4f6;
 }
 
@@ -196,7 +340,8 @@ const handleDragEnd = (e) => {
   object-fit: cover;
 }
 
-.item-content {
+/* Item Details */
+.item-details {
   padding: 1rem;
 }
 
@@ -237,6 +382,7 @@ const handleDragEnd = (e) => {
   color: white;
 }
 
+/* Action Buttons */
 .item-actions {
   display: flex;
   gap: 0.5rem;
@@ -280,9 +426,85 @@ const handleDragEnd = (e) => {
   background-color: #b91c1c;
 }
 
+/* Mobile Reorder Controls */
+.mobile-reorder {
+  position: absolute;
+  right: 0.75rem;
+  top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  z-index: 10;
+}
+
+.reorder-btn {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--navy-blue);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+}
+
+.reorder-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.reorder-btn:not(:disabled):hover {
+  background: white;
+  transform: scale(1.05);
+}
+
+.reorder-btn:not(:disabled):active {
+  transform: scale(0.95);
+}
+
+.reorder-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* Responsive Display */
+.desktop-only {
+  display: none;
+}
+
+.mobile-only {
+  display: none;
+}
+
+@media (min-width: 769px) {
+  .desktop-only {
+    display: flex;
+  }
+}
+
+/* Mobile Responsive */
 @media (max-width: 768px) {
   .item-actions {
     flex-direction: column;
+  }
+
+  .drag-handle {
+    top: 1rem;
+    left: 1rem;
+  }
+
+  .mobile-only {
+    display: flex;
+  }
+
+  .item-actions {
+    flex-direction: column;
+    gap: 0.5rem;
   }
 }
 </style>

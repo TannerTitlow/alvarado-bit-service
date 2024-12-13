@@ -45,12 +45,15 @@ onMounted(() => {
     </section>
 
     <section class="featured-section">
-    <div class="featured-container">
-      <h2 class="featured-title">Featured Products & Projects</h2>
-      <p class="featured-subtitle">Discover our latest innovations and success stories in water well drilling</p>
-      <FeaturedCarousel />
-    </div>
-  </section>
+      <div class="featured-container">
+        <h2 class="featured-title">Featured Products & Projects</h2>
+        <p class="featured-subtitle">
+          Discover our latest innovations and success stories in water well
+          drilling
+        </p>
+        <FeaturedCarousel />
+      </div>
+    </section>
 
     <section class="features">
       <div class="feature">
@@ -288,7 +291,7 @@ main {
   color: var(--steel-gray);
   font-size: 1.25rem;
   max-width: 700px;
-  margin: 0 auto 3rem;
+  margin: 0 auto 1rem;
   line-height: 1.6;
 }
 
