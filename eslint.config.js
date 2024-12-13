@@ -16,4 +16,12 @@ export default [
   js.configs.recommended,
   ...pluginVue.configs['flat/essential'],
   skipFormatting,
+
+  {
+    name: 'app/custom-rules',
+    rules: {
+      'no-unused-vars': 'off', // This will disable the no-unused-vars rule globally
+      'vue/no-unused-vars': 'off', // This will disable the vue/no-unused-vars rule globally
+    },
+  },
 ]

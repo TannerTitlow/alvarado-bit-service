@@ -1,26 +1,17 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import { RouterLink, useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabaseClient'
+import ContactSubmissions from '@/components/ContactSubmissions.vue'
+import ManageProducts from '@/components/ManageProducts.vue'
+import ManageFeatured from '@/components/ManageFeatured.vue'
 
 const router = useRouter()
 const submissions = ref([])
 const loading = ref(true)
 const error = ref(null)
-
-// Filter and sort states
-const statusFilter = ref('all')
-const dateRange = ref('all')
-const searchQuery = ref('')
-const sortBy = ref('newest')
-
-// Status options
-const statusOptions = {
-  new: 'New',
-  in_progress: 'In Progress',
-  completed: 'Completed',
-  archived: 'Archived',
-}
+const currentSection = ref('submissions')
+const isSidenavOpen = ref(false)
 
 // Fetch submissions
 const fetchSubmissions = async () => {
@@ -42,88 +33,21 @@ const fetchSubmissions = async () => {
   }
 }
 
-// Update submission status
-const updateStatus = async (submissionId, newStatus) => {
-  try {
-    const { error: updateError } = await supabase
-      .from('contact_submissions')
-      .update({ status: newStatus })
-      .eq('id', submissionId)
-
-    if (updateError) throw updateError
-
-    // Update local state
-    const submission = submissions.value.find(s => s.id === submissionId)
-    if (submission) {
-      submission.status = newStatus
-    }
-  } catch (err) {
-    console.error('Error updating status:', err)
-    alert('Error updating status')
-  }
-}
-
-// Filter and sort logic
-const filteredAndSortedSubmissions = computed(() => {
-  let filtered = [...submissions.value]
-
-  // Status filter
-  if (statusFilter.value !== 'all') {
-    filtered = filtered.filter(s => s.status === statusFilter.value)
-  }
-
-  // Date range filter
-  const now = new Date()
-  const thirtyDaysAgo = new Date(now - 30 * 24 * 60 * 60 * 1000)
-  const sevenDaysAgo = new Date(now - 7 * 24 * 60 * 60 * 1000)
-
-  switch (dateRange.value) {
-    case '7days':
-      filtered = filtered.filter(s => new Date(s.created_at) >= sevenDaysAgo)
-      break
-    case '30days':
-      filtered = filtered.filter(s => new Date(s.created_at) >= thirtyDaysAgo)
-      break
-  }
-
-  // Search query
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(
-      s =>
-        s.name.toLowerCase().includes(query) ||
-        s.email.toLowerCase().includes(query) ||
-        s.message.toLowerCase().includes(query),
-    )
-  }
-
-  // Sorting
-  switch (sortBy.value) {
-    case 'oldest':
-      filtered.sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
-      break
-    case 'a-z':
-      filtered.sort((a, b) => a.name.localeCompare(b.name))
-      break
-    case 'z-a':
-      filtered.sort((a, b) => b.name.localeCompare(a.name))
-      break
-    default: // 'newest'
-      filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-  }
-
-  return filtered
-})
-
 // Handle logout
 const handleLogout = async () => {
   await supabase.auth.signOut()
   router.push('/admin/login')
 }
 
-// Format date
-const formatDate = dateString => {
-  return new Date(dateString).toLocaleString()
+// Toggle sidenav for mobile
+const toggleSidenav = () => {
+  isSidenavOpen.value = !isSidenavOpen.value
+}
+
+// Close sidenav when changing sections (mobile)
+const handleSectionChange = (section) => {
+  currentSection.value = section
+  isSidenavOpen.value = false
 }
 
 onMounted(() => {
@@ -133,113 +57,179 @@ onMounted(() => {
 
 <template>
   <main class="admin">
-    <div class="admin-header">
-      <div class="container">
-        <div class="header-content">
-          <h1>Contact Form Submissions</h1>
-          <button @click="handleLogout" class="logout-btn">Logout</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="container">
-      <!-- Filters and Search -->
-      <div class="filters-section">
-        <div class="filters-grid">
-          <div class="filter-group">
-            <label for="status">Status</label>
-            <select id="status" v-model="statusFilter" class="filter-select">
-              <option value="all">All Status</option>
-              <option
-                v-for="(label, value) in statusOptions"
-                :key="value"
-                :value="value"
-              >
-                {{ label }}
-              </option>
-            </select>
-          </div>
-
-          <div class="filter-group">
-            <label for="date">Date Range</label>
-            <select id="date" v-model="dateRange" class="filter-select">
-              <option value="all">All Time</option>
-              <option value="7days">Last 7 Days</option>
-              <option value="30days">Last 30 Days</option>
-            </select>
-          </div>
-
-          <div class="filter-group">
-            <label for="sort">Sort By</label>
-            <select id="sort" v-model="sortBy" class="filter-select">
-              <option value="newest">Newest First</option>
-              <option value="oldest">Oldest First</option>
-              <option value="a-z">Name A-Z</option>
-              <option value="z-a">Name Z-A</option>
-            </select>
-          </div>
-
-          <div class="filter-group">
-            <label for="search">Search</label>
-            <input
-              type="text"
-              id="search"
-              v-model="searchQuery"
-              placeholder="Search submissions..."
-              class="search-input"
-            />
-          </div>
-        </div>
-      </div>
-
-      <!-- Submissions List -->
-      <div v-if="loading" class="loading">Loading submissions...</div>
-
-      <div v-else-if="error" class="error-message">{{ error }}</div>
-
-      <div
-        v-else-if="filteredAndSortedSubmissions.length === 0"
-        class="no-submissions"
-      >
-        No submissions found
-      </div>
-
-      <div v-else class="submissions-list">
-        <div
-          v-for="submission in filteredAndSortedSubmissions"
-          :key="submission.id"
-          class="submission-card"
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+      <button class="menu-toggle" @click="toggleSidenav">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="menu-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
         >
-          <div class="submission-header">
-            <div class="submission-title">
-              <h3>{{ submission.name }}</h3>
-              <select
-                v-model="submission.status"
-                @change="updateStatus(submission.id, submission.status)"
-                :class="['status-select', submission.status]"
-              >
-                <option
-                  v-for="(label, value) in statusOptions"
-                  :key="value"
-                  :value="value"
-                >
-                  {{ label }}
-                </option>
-              </select>
-            </div>
-            <span class="date">{{ formatDate(submission.created_at) }}</span>
-          </div>
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M4 6h16M4 12h16M4 18h16"
+          />
+        </svg>
+      </button>
+      <h1 class="mobile-title">
+        {{
+          currentSection === 'submissions' ? 'Contact Submissions' :
+          currentSection === 'products' ? 'Manage Products' :
+          'Featured Content'
+        }}
+      </h1>
+    </header>
 
-          <div class="submission-details">
-            <p><strong>Email:</strong> {{ submission.email }}</p>
-            <p v-if="submission.phone">
-              <strong>Phone:</strong> {{ submission.phone }}
-            </p>
-            <p class="message">
-              <strong>Message:</strong> {{ submission.message }}
-            </p>
-          </div>
+    <!-- Overlay for mobile -->
+    <div
+      v-if="isSidenavOpen"
+      class="sidenav-overlay"
+      @click="toggleSidenav"
+    ></div>
+
+    <!-- Side Navigation -->
+    <aside :class="['sidenav', { 'is-open': isSidenavOpen }]">
+      <div class="sidenav-header">
+        <img src="@/assets/abs-logo.png" alt="ABS Logo" class="sidenav-logo" />
+        <h2>Admin Dashboard</h2>
+      </div>
+
+      <nav class="sidenav-menu">
+        <button
+          @click="handleSectionChange('submissions')"
+          :class="['nav-item', { active: currentSection === 'submissions' }]"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="nav-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+            />
+          </svg>
+          <span>Contact Submissions</span>
+        </button>
+
+        <button
+          @click="handleSectionChange('products')"
+          :class="['nav-item', { active: currentSection === 'products' }]"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="nav-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+            />
+          </svg>
+          <span>Manage Products</span>
+        </button>
+
+        <button
+          @click="handleSectionChange('featured')"
+          :class="['nav-item', { active: currentSection === 'featured' }]"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="nav-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+            />
+          </svg>
+          <span>Featured Content</span>
+        </button>
+      </nav>
+
+      <div class="sidenav-footer">
+        <div class="footer-buttons">
+          <RouterLink to="/" class="home-btn">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="nav-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+              />
+            </svg>
+            <span>Back to Home</span>
+          </RouterLink>
+
+          <button @click="handleLogout" class="logout-btn">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="nav-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+              />
+            </svg>
+            <span>Logout</span>
+          </button>
         </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <header class="content-header desktop-only">
+        <h1>
+          {{
+            currentSection === 'submissions' ? 'Contact Submissions' :
+            currentSection === 'products' ? 'Manage Products' :
+            'Featured Content'
+          }}
+        </h1>
+      </header>
+
+      <!-- Dynamic Content -->
+      <div class="content-body">
+        <ContactSubmissions
+          v-if="currentSection === 'submissions'"
+          :submissions="submissions"
+          :loading="loading"
+          @refresh-data="fetchSubmissions"
+        />
+        <ManageProducts
+          v-if="currentSection === 'products'"
+        />
+        <ManageFeatured
+          v-if="currentSection === 'featured'"
+        />
       </div>
     </div>
   </main>
@@ -247,206 +237,235 @@ onMounted(() => {
 
 <style scoped>
 .admin {
-  padding-top: 64px;
-  padding-bottom: 2rem;
   min-height: 100vh;
+  display: flex;
   background-color: #f5f5f5;
 }
 
-.admin-header {
+/* Mobile Header */
+.mobile-header {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
   background: white;
-  padding: 1.5rem 0;
-  margin-bottom: 2rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
   padding: 0 1rem;
-}
-
-.header-content {
-  display: flex;
-  justify-content: space-between;
+  z-index: 40;
+  border-bottom: 1px solid #eee;
   align-items: center;
 }
 
-.header-content h1 {
-  color: var(--navy-blue);
-  font-size: var(--text-2xl);
-}
-
-.logout-btn {
-  background: var(--patriot-red);
-  color: white;
-  padding: 0.5rem 1rem;
+.menu-toggle {
+  background: none;
   border: none;
-  border-radius: 0.375rem;
+  padding: 0.5rem;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  color: var(--navy-blue);
 }
 
-.logout-btn:hover {
-  background-color: #8b1a28;
+.menu-icon {
+  width: 24px;
+  height: 24px;
 }
 
-.filters-section {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
+.mobile-title {
+  margin-left: 1rem;
+  font-size: 1.25rem;
+  color: var(--navy-blue);
 }
 
-.filters-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
-}
-
-.filter-group {
+/* Sidenav */
+.sidenav {
+  width: 280px;
+  background: var(--navy-blue);
+  color: white;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  position: fixed;
+  height: 100vh;
+  left: 0;
+  top: 0;
+  z-index: 50;
+  transition: transform 0.3s ease;
 }
 
-.filter-group label {
-  font-size: var(--text-sm);
-  font-weight: var(--fw-medium);
-  color: var(--navy-blue);
+.sidenav-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 45;
 }
 
-.filter-select,
-.search-input {
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 0.375rem;
-  font-size: var(--text-base);
-}
-
-.filter-select:focus,
-.search-input:focus {
-  outline: none;
-  border-color: var(--navy-blue);
-}
-
-.submissions-list {
-  display: grid;
-  gap: 1.5rem;
-}
-
-.submission-card {
-  background: white;
+.sidenav-header {
   padding: 1.5rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.submission-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 1rem;
-}
-
-.submission-header h3 {
-  color: var(--navy-blue);
-  font-size: var(--text-lg);
-  font-weight: var(--fw-semibold);
-}
-
-.date {
-  color: var(--steel-gray);
-  font-size: var(--text-sm);
-}
-
-.submission-details {
-  display: grid;
-  gap: 0.5rem;
-}
-
-.submission-details p {
-  color: var(--steel-gray);
-}
-
-.submission-details .message {
-  margin-top: 0.5rem;
-  white-space: pre-line;
-}
-
-.submission-title {
   display: flex;
   align-items: center;
   gap: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.status-select {
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  font-size: var(--text-sm);
-  border: 1px solid #ddd;
+.sidenav-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
 }
 
-.status-select.new {
-  background-color: #eef2ff;
-  border-color: #c7d2fe;
-  color: #4338ca;
+.sidenav-header h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
 }
 
-.status-select.in_progress {
-  background-color: #fff7ed;
-  border-color: #fed7aa;
-  color: #c2410c;
+.sidenav-menu {
+  flex: 1;
+  padding: 1.5rem 1rem;
 }
 
-.status-select.completed {
-  background-color: #ecfdf5;
-  border-color: #a7f3d0;
-  color: #047857;
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  color: rgba(255, 255, 255, 0.8);
+  background: transparent;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+  text-align: left;
 }
 
-.status-select.archived {
-  background-color: #f3f4f6;
-  border-color: #d1d5db;
-  color: #4b5563;
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
 }
 
-.loading,
-.error-message,
-.no-submissions {
-  text-align: center;
-  padding: 2rem;
+.nav-item.active {
+  background: var(--patriot-red);
+  color: white;
+}
+
+.nav-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.sidenav-footer {
+  padding: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.home-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  color: rgba(255, 255, 255, 0.8);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+  text-decoration: none;
+}
+
+.home-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  color: rgba(255, 255, 255, 0.8);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+  font-family: var(--font-primary);
+}
+
+.logout-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  margin-left: 280px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.content-header {
   background: white;
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid #eee;
 }
 
-.error-message {
-  color: #b91c1c;
+.content-header h1 {
+  color: var(--navy-blue);
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.content-body {
+  flex: 1;
+  background: #f5f5f5;
 }
 
 @media (max-width: 768px) {
-  .admin {
-    padding-top: 109px;
+  .mobile-header {
+    display: flex;
   }
 
-  .admin-header {
-    padding: 1rem 0;
+  .desktop-only {
+    display: none;
   }
 
-  .header-content h1 {
-    font-size: var(--text-xl);
+  .sidenav {
+    transform: translateX(-100%);
   }
 
-  .filters-grid {
-    grid-template-columns: 1fr;
+  .sidenav.is-open {
+    transform: translateX(0);
   }
 
-  .submission-title {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
+  .sidenav-overlay {
+    display: block;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .sidenav-overlay:has(+ .sidenav.is-open) {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .main-content {
+    margin-left: 0;
+    padding-top: 60px;
   }
 }
 </style>

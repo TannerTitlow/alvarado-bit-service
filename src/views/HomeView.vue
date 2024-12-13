@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted } from 'vue'
+import FeaturedCarousel from '@/components/FeaturedCarousel.vue'
 
 const mp4Src = new URL('@/assets/videos/abs-2023-mobile.mp4', import.meta.url)
   .href
@@ -42,6 +43,14 @@ onMounted(() => {
         </div>
       </div>
     </section>
+
+    <section class="featured-section">
+    <div class="featured-container">
+      <h2 class="featured-title">Featured Products & Projects</h2>
+      <p class="featured-subtitle">Discover our latest innovations and success stories in water well drilling</p>
+      <FeaturedCarousel />
+    </div>
+  </section>
 
     <section class="features">
       <div class="feature">
@@ -256,6 +265,33 @@ main {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
+.featured-section {
+  background: linear-gradient(to bottom, #f5f5f5, white);
+  padding: 4rem 1rem;
+}
+
+.featured-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.featured-title {
+  text-align: center;
+  color: var(--navy-blue);
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.featured-subtitle {
+  text-align: center;
+  color: var(--steel-gray);
+  font-size: 1.25rem;
+  max-width: 700px;
+  margin: 0 auto 3rem;
+  line-height: 1.6;
+}
+
 .features {
   display: grid;
   gap: 2rem;
@@ -376,6 +412,19 @@ main {
   .cta-secondary {
     width: 100%;
     padding: 0.875rem 1.5rem;
+  }
+
+  .featured-section {
+    padding: 2rem 1rem;
+  }
+
+  .featured-title {
+    font-size: 1.75rem;
+  }
+
+  .featured-subtitle {
+    font-size: 1rem;
+    margin-bottom: 2rem;
   }
 }
 

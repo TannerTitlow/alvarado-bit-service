@@ -1,10 +1,15 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
-import { ref, onMounted } from 'vue'
+import { RouterLink, RouterView, useRoute } from 'vue-router'
+import { ref, onMounted, computed } from 'vue'
 import { supabase } from '@/lib/supabaseClient'
-import './assets/fonts.css'
 
 const session = ref(null)
+const route = useRoute()
+
+// Check if current route is an admin route
+const isAdminRoute = computed(() => {
+  return route.path.startsWith('/admin')
+})
 
 // Check and update session state
 async function getSession() {
@@ -25,7 +30,7 @@ onMounted(() => {
 
 <template>
   <div class="app">
-    <header class="header">
+    <header v-if="!isAdminRoute" class="header">
       <nav class="nav">
         <div class="company-name">
           <RouterLink to="/">
@@ -37,9 +42,7 @@ onMounted(() => {
           <RouterLink to="/" class="nav-link">Home</RouterLink>
           <RouterLink to="/about" class="nav-link">About</RouterLink>
           <RouterLink to="/contact" class="nav-link">Contact</RouterLink>
-          <RouterLink v-if="session" to="/admin" class="nav-link"
-            >Admin</RouterLink
-          >
+          <RouterLink v-if="session" to="/admin" class="nav-link">Admin</RouterLink>
         </div>
       </nav>
     </header>
