@@ -95,7 +95,7 @@ const submitForm = async e => {
                     <p class="location-label">Georgia Coverage</p>
                     <p class="location-name">Stephen Schafer</p>
                     <p class="location-phone">
-                      <a href="tel:+18172051672">817-240-8551</a>
+                      <a href="tel:+18172408551">817-240-8551</a>
                     </p>
                     <p class="location-note">
                       Serving customers across Georgia
