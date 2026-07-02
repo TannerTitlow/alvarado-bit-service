@@ -110,7 +110,7 @@ export function createServiceAreaBusinessSchema() {
       {
         '@type': 'ContactPoint',
         contactType: 'sales',
-        telephone: '+1-817-205-1672',
+        telephone: '+1-817-240-8551',
         areaServed: 'GA',
         availableLanguage: 'English',
       },
