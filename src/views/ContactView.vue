@@ -54,7 +54,6 @@ const submitForm = async e => {
     loading.value = false
   }
 }
-
 </script>
 
 <template>
@@ -96,9 +95,11 @@ const submitForm = async e => {
                     <p class="location-label">Georgia Coverage</p>
                     <p class="location-name">Stephen Schafer</p>
                     <p class="location-phone">
-                      <a href="tel:+18172051672">817-205-1672</a>
+                      <a href="tel:+18172051672">817-240-8551</a>
                     </p>
-                    <p class="location-note">Serving customers across Georgia</p>
+                    <p class="location-note">
+                      Serving customers across Georgia
+                    </p>
                   </div>
                 </div>
               </div>
@@ -335,7 +336,9 @@ const submitForm = async e => {
   position: relative;
   overflow: hidden;
   box-shadow: 0 3px 14px rgba(17, 24, 39, 0.06);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .address-hq {
