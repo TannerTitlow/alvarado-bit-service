@@ -1,15 +1,13 @@
 <script setup>
 import { RouterLink, RouterView, useRoute } from 'vue-router'
-import { ref, onMounted, computed } from 'vue'
+import { computed } from 'vue'
 import { useHead } from '@unhead/vue'
-import { supabase } from '@/lib/supabaseClient'
 import { DEFAULT_OG_IMAGE, DEFAULT_SEO, getCanonicalUrl } from '@/lib/seo'
 
-const session = ref(null)
 const route = useRoute()
 
 const isAdminRoute = computed(() => {
-  return route.path.startsWith('/admin')
+  return route.meta?.isAdmin === true
 })
 
 const routeSeo = computed(() => route.meta?.seo || DEFAULT_SEO)
@@ -24,7 +22,13 @@ const keywords = computed(() => {
 
   return routeSeo.value.keywords || DEFAULT_SEO.keywords
 })
-const canonicalUrl = computed(() => getCanonicalUrl(route.path))
+const canonicalUrl = computed(() => {
+  if (route.meta?.noindex) {
+    return null
+  }
+
+  return getCanonicalUrl(route.path)
+})
 const robots = computed(() => {
   return route.meta?.noindex ? 'noindex, nofollow' : 'index, follow'
 })
@@ -47,17 +51,22 @@ useHead(() => {
     { name: 'description', content: description.value },
     { name: 'robots', content: robots.value },
     { property: 'og:type', content: 'website' },
-    { property: 'og:url', content: canonicalUrl.value },
     { property: 'og:title', content: title.value },
     { property: 'og:description', content: description.value },
     { property: 'og:image', content: DEFAULT_OG_IMAGE },
     { property: 'og:site_name', content: 'Alvarado Bit Service' },
     { name: 'twitter:card', content: 'summary_large_image' },
-    { name: 'twitter:url', content: canonicalUrl.value },
     { name: 'twitter:title', content: title.value },
     { name: 'twitter:description', content: description.value },
     { name: 'twitter:image', content: DEFAULT_OG_IMAGE },
   ]
+
+  if (canonicalUrl.value) {
+    meta.push(
+      { property: 'og:url', content: canonicalUrl.value },
+      { name: 'twitter:url', content: canonicalUrl.value },
+    )
+  }
 
   if (keywords.value) {
     meta.push({ name: 'keywords', content: keywords.value })
@@ -66,7 +75,7 @@ useHead(() => {
   return {
     title: title.value,
     meta,
-    link: [{ rel: 'canonical', href: canonicalUrl.value }],
+    link: canonicalUrl.value ? [{ rel: 'canonical', href: canonicalUrl.value }] : [],
     script:
       structuredData.value ?
         [
@@ -80,18 +89,6 @@ useHead(() => {
   }
 })
 
-async function getSession() {
-  const { data } = await supabase.auth.getSession()
-  session.value = data.session
-}
-
-onMounted(() => {
-  getSession()
-
-  supabase.auth.onAuthStateChange((_event, _session) => {
-    session.value = _session
-  })
-})
 </script>
 
 <template>
@@ -108,7 +105,6 @@ onMounted(() => {
           <RouterLink to="/" class="nav-link">Home</RouterLink>
           <RouterLink to="/about" class="nav-link">About</RouterLink>
           <RouterLink to="/contact" class="nav-link">Contact</RouterLink>
-          <RouterLink v-if="session" to="/admin" class="nav-link">Admin</RouterLink>
         </div>
       </nav>
     </header>

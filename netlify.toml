@@ -3,6 +3,47 @@
   publish = "dist"
 
 [[redirects]]
+  from = "https://alvaradobitservice.com/admin"
+  to = "https://admin.alvaradobitservice.com/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://alvaradobitservice.com/admin/*"
+  to = "https://admin.alvaradobitservice.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.alvaradobitservice.com/admin"
+  to = "https://admin.alvaradobitservice.com/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.alvaradobitservice.com/admin/*"
+  to = "https://admin.alvaradobitservice.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://admin.alvaradobitservice.com/admin"
+  to = "https://admin.alvaradobitservice.com/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://admin.alvaradobitservice.com/admin/*"
+  to = "https://admin.alvaradobitservice.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://admin.alvaradobitservice.com/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
   from = "/admin"
   to = "/index.html"
   status = 200

@@ -1,10 +1,13 @@
 <script setup>
-import { ref, onMounted } from 'vue'
-import { RouterLink, useRouter } from 'vue-router'
+import { computed, ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabaseClient'
+import { SITE_URL } from '@/lib/seo'
 import ContactSubmissions from '@/components/ContactSubmissions.vue'
 import ManageProducts from '@/components/ManageProducts.vue'
 import ManageFeatured from '@/components/ManageFeatured.vue'
+
+const ADMIN_SUBDOMAIN_HOST = 'admin.alvaradobitservice.com'
 
 const router = useRouter()
 const submissions = ref([])
@@ -12,6 +15,13 @@ const loading = ref(true)
 const error = ref(null)
 const currentSection = ref('submissions')
 const isSidenavOpen = ref(false)
+const publicSiteHref = computed(() => {
+  if (typeof window === 'undefined') {
+    return SITE_URL
+  }
+
+  return window.location.hostname === ADMIN_SUBDOMAIN_HOST ? SITE_URL : '/'
+})
 
 // Fetch submissions
 const fetchSubmissions = async () => {
@@ -36,7 +46,7 @@ const fetchSubmissions = async () => {
 // Handle logout
 const handleLogout = async () => {
   await supabase.auth.signOut()
-  router.push('/admin/login')
+  router.push({ name: 'login' })
 }
 
 // Toggle sidenav for mobile
@@ -165,7 +175,7 @@ onMounted(() => {
 
       <div class="sidenav-footer">
         <div class="footer-buttons">
-          <RouterLink to="/" class="home-btn">
+          <a :href="publicSiteHref" class="home-btn">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               class="nav-icon"
@@ -181,7 +191,7 @@ onMounted(() => {
               />
             </svg>
             <span>Back to Home</span>
-          </RouterLink>
+          </a>
 
           <button @click="handleLogout" class="logout-btn">
             <svg

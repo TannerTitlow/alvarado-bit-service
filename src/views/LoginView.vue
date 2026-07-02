@@ -22,7 +22,7 @@ const handleLogin = async e => {
 
     if (error) throw error
 
-    router.push('/admin')
+    router.push({ name: 'admin' })
   } catch (error) {
     errorMsg.value = error.message
   } finally {
