@@ -1,17 +1,3 @@
-<script setup>
-import { onMounted } from 'vue'
-
-onMounted(() => {
-  document.title = 'About Us | Our Legacy Since 1976'
-  document
-    .querySelector('meta[name="description"]')
-    .setAttribute(
-      'content',
-      'Family-owned since 1976, Alvarado Bit Service has built a nationwide reputation for excellence in water well drill bits manufacturing and service.',
-    )
-})
-</script>
-
 <template>
   <main class="about">
     <section class="about-hero">

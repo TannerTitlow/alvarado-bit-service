@@ -1,21 +1,10 @@
 <script setup>
-import { onMounted } from 'vue'
 import FeaturedCarousel from '@/components/FeaturedCarousel.vue'
 
 const mp4Src = new URL('@/assets/videos/abs-2023-mobile.mp4', import.meta.url)
   .href
 const webmSrc = new URL('@/assets/videos/abs-2023-mobile.webm', import.meta.url)
   .href
-
-onMounted(() => {
-  document.title = 'Alvarado Bit Service | American-Made Water Well Drill Bits'
-  document
-    .querySelector('meta[name="description"]')
-    .setAttribute(
-      'content',
-      'Family-owned excellence in drilling since 1976. Specialized in manufacturing, selling, and repairing water well drill bits with nationwide 24/7 service.',
-    )
-})
 </script>
 
 <template>

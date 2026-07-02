@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { supabase } from '@/lib/supabaseClient'
 
 const formData = ref({
@@ -55,15 +55,6 @@ const submitForm = async e => {
   }
 }
 
-onMounted(() => {
-  document.title = 'Contact Alvarado Bit Service | 24/7 Nationwide Service'
-  document
-    .querySelector('meta[name="description"]')
-    .setAttribute(
-      'content',
-      'Available 24/7 for all your drilling needs. Contact us for water well drill bits, repairs, and services anywhere in the United States.',
-    )
-})
 </script>
 
 <template>
@@ -90,10 +81,20 @@ onMounted(() => {
             <h2>Get In Touch</h2>
             <div class="info-items">
               <div class="info-item">
-                <h3>Address</h3>
-                <p>Alvarado Bit Service</p>
-                <p>841 Hill County Road 1136</p>
-                <p>Rio Vista, TX 76093</p>
+                <h3>Headquarters</h3>
+                <div class="locations">
+                  <div class="address">
+                    <p>Alvarado Bit Service</p>
+                    <p>841 Hill County Road 1136</p>
+                    <p>Rio Vista, TX 76093</p>
+                  </div>
+                  <div class="address">
+                    <p>Georgia Service Representative</p>
+                    <p>Stephen Schafer</p>
+                    <p><a href="tel:+18172051672">817-205-1672</a></p>
+                    <p>Serving customers across Georgia</p>
+                  </div>
+                </div>
               </div>
 
               <div class="info-item">
@@ -293,6 +294,15 @@ onMounted(() => {
 .info-item p {
   color: #707070;
   line-height: 1.5;
+}
+
+.locations {
+  display: flex;
+  justify-content: space-around;
+}
+
+.address p {
+  margin: 0;
 }
 
 .info-item.guarantee {
