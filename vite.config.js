@@ -28,6 +28,12 @@ export default defineConfig({
     // Increase chunk size limit if needed
     chunkSizeWarningLimit: 2000,
   },
+  ssgOptions: {
+    dirStyle: 'nested',
+    includedRoutes(paths) {
+      return paths.filter(path => !path.startsWith('/admin'))
+    },
+  },
   vue: {
     compilerOptions: {
       isCustomElement: tag => false,

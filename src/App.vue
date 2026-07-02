@@ -1,27 +1,93 @@
 <script setup>
 import { RouterLink, RouterView, useRoute } from 'vue-router'
 import { ref, onMounted, computed } from 'vue'
+import { useHead } from '@unhead/vue'
 import { supabase } from '@/lib/supabaseClient'
+import { DEFAULT_OG_IMAGE, DEFAULT_SEO, getCanonicalUrl } from '@/lib/seo'
 
 const session = ref(null)
 const route = useRoute()
 
-// Check if current route is an admin route
 const isAdminRoute = computed(() => {
   return route.path.startsWith('/admin')
 })
 
-// Check and update session state
+const routeSeo = computed(() => route.meta?.seo || DEFAULT_SEO)
+const title = computed(() => routeSeo.value.title || DEFAULT_SEO.title)
+const description = computed(() => {
+  return routeSeo.value.description || DEFAULT_SEO.description
+})
+const keywords = computed(() => {
+  if (route.meta?.noindex) {
+    return routeSeo.value.keywords || ''
+  }
+
+  return routeSeo.value.keywords || DEFAULT_SEO.keywords
+})
+const canonicalUrl = computed(() => getCanonicalUrl(route.path))
+const robots = computed(() => {
+  return route.meta?.noindex ? 'noindex, nofollow' : 'index, follow'
+})
+const structuredData = computed(() => {
+  const data =
+    typeof route.meta?.structuredData === 'function' ?
+      route.meta.structuredData()
+    : route.meta?.structuredData
+
+  if (!data || (Array.isArray(data) && data.length === 0)) {
+    return null
+  }
+
+  return data
+})
+
+useHead(() => {
+  const meta = [
+    { name: 'title', content: title.value },
+    { name: 'description', content: description.value },
+    { name: 'robots', content: robots.value },
+    { property: 'og:type', content: 'website' },
+    { property: 'og:url', content: canonicalUrl.value },
+    { property: 'og:title', content: title.value },
+    { property: 'og:description', content: description.value },
+    { property: 'og:image', content: DEFAULT_OG_IMAGE },
+    { property: 'og:site_name', content: 'Alvarado Bit Service' },
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:url', content: canonicalUrl.value },
+    { name: 'twitter:title', content: title.value },
+    { name: 'twitter:description', content: description.value },
+    { name: 'twitter:image', content: DEFAULT_OG_IMAGE },
+  ]
+
+  if (keywords.value) {
+    meta.push({ name: 'keywords', content: keywords.value })
+  }
+
+  return {
+    title: title.value,
+    meta,
+    link: [{ rel: 'canonical', href: canonicalUrl.value }],
+    script:
+      structuredData.value ?
+        [
+          {
+            id: 'route-structured-data',
+            type: 'application/ld+json',
+            textContent: JSON.stringify(structuredData.value),
+          },
+        ]
+      : [],
+  }
+})
+
 async function getSession() {
   const { data } = await supabase.auth.getSession()
   session.value = data.session
 }
 
-// Listen for auth state changes
 onMounted(() => {
   getSession()
 
-  // Set up auth state listener
   supabase.auth.onAuthStateChange((_event, _session) => {
     session.value = _session
   })

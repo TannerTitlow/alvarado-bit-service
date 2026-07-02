@@ -80,19 +80,25 @@ const submitForm = async e => {
           <div class="contact-info">
             <h2>Get In Touch</h2>
             <div class="info-items">
-              <div class="info-item">
-                <h3>Headquarters</h3>
+              <div class="info-item location-card">
+                <h3>Headquarters & Coverage</h3>
+                <p class="location-intro">
+                  Texas headquarters with dedicated Georgia field coverage.
+                </p>
                 <div class="locations">
-                  <div class="address">
-                    <p>Alvarado Bit Service</p>
+                  <div class="address address-hq">
+                    <p class="location-label">Main Shop - Texas</p>
+                    <p class="location-name">Alvarado Bit Service</p>
                     <p>841 Hill County Road 1136</p>
                     <p>Rio Vista, TX 76093</p>
                   </div>
-                  <div class="address">
-                    <p>Georgia Service Representative</p>
-                    <p>Stephen Schafer</p>
-                    <p><a href="tel:+18172051672">817-205-1672</a></p>
-                    <p>Serving customers across Georgia</p>
+                  <div class="address address-rep">
+                    <p class="location-label">Georgia Coverage</p>
+                    <p class="location-name">Stephen Schafer</p>
+                    <p class="location-phone">
+                      <a href="tel:+18172051672">817-205-1672</a>
+                    </p>
+                    <p class="location-note">Serving customers across Georgia</p>
                   </div>
                 </div>
               </div>
@@ -296,13 +302,113 @@ const submitForm = async e => {
   line-height: 1.5;
 }
 
+.location-card {
+  padding: 1.75rem;
+  border: 1px solid #e6eaf0;
+  background: #ffffff;
+  box-shadow: 0 8px 20px rgba(27, 43, 82, 0.08);
+}
+
+.location-card h3 {
+  margin-bottom: 0.5rem;
+}
+
+.location-intro {
+  margin-bottom: 1.1rem;
+  color: #5b6475;
+  font-size: 0.96rem;
+}
+
 .locations {
-  display: flex;
-  justify-content: space-around;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.1rem;
+}
+
+.address {
+  background: #fff;
+  border: 1px solid #ebeff5;
+  border-radius: 0.5rem;
+  padding: 1rem 1rem 1.05rem;
+  display: grid;
+  gap: 0.28rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 3px 14px rgba(17, 24, 39, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.address-hq {
+  border-left: 4px solid #1b2b52;
+}
+
+.address-rep {
+  border-left: 4px solid #b22234;
+}
+
+.location-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  height: 1.85rem;
+  box-sizing: border-box;
+  white-space: nowrap;
+  font-size: 0.72rem;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+  padding: 0 0.65rem;
+  border-radius: 999px;
+  color: #1b2b52;
+  background: #e8eefc;
+}
+
+.address-rep .location-label {
+  color: #8b1a28;
+  background: #fdecef;
+}
+
+.location-name {
+  font-weight: 700;
+  color: #1b2b52;
+  font-size: 1.15rem;
+  line-height: 1.25;
+  margin-bottom: 0.35rem;
 }
 
 .address p {
   margin: 0;
+}
+
+.location-phone a {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 600;
+  color: #0f2a5f;
+  background: #eef3ff;
+  border: 1px solid #d9e2f7;
+  border-radius: 999px;
+  padding: 0.2rem 0.7rem;
+}
+
+.location-phone a:hover {
+  color: #8b1a28;
+  border-color: #f5cfd6;
+  background: #fff5f7;
+}
+
+.location-note {
+  color: #586274;
+}
+
+@media (hover: hover) {
+  .address:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(17, 24, 39, 0.12);
+  }
 }
 
 .info-item.guarantee {
@@ -458,6 +564,14 @@ const submitForm = async e => {
 
   .availability-banner p {
     font-size: 1rem;
+  }
+
+  .locations {
+    grid-template-columns: 1fr;
+  }
+
+  .location-card {
+    padding: 1.35rem;
   }
 }
 </style>

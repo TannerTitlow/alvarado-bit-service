@@ -1,10 +1,7 @@
 <script setup>
 import FeaturedCarousel from '@/components/FeaturedCarousel.vue'
-
-const mp4Src = new URL('@/assets/videos/abs-2023-mobile.mp4', import.meta.url)
-  .href
-const webmSrc = new URL('@/assets/videos/abs-2023-mobile.webm', import.meta.url)
-  .href
+import mp4Src from '@/assets/videos/abs-2023-mobile.mp4'
+import webmSrc from '@/assets/videos/abs-2023-mobile.webm'
 </script>
 
 <template>

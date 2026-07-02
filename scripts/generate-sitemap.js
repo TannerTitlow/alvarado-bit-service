@@ -1,5 +1,5 @@
 import { writeFileSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 const SITE_URL = 'https://www.alvaradobitservice.com'
 const lastmod = new Date().toISOString().slice(0, 10)
@@ -27,7 +27,7 @@ ${urls}
 </urlset>
 `
 
-const outputPath = resolve(process.cwd(), 'public/sitemap.xml')
+const outputPath = fileURLToPath(new URL('../public/sitemap.xml', import.meta.url))
 writeFileSync(outputPath, sitemap)
 
 console.log(`Sitemap generated at ${outputPath}`)
