@@ -1,10 +1,11 @@
 <script setup>
 import {
   ref,
+  computed,
   onMounted,
   onUnmounted,
   onServerPrefetch,
-  watchEffect,
+  watch,
   nextTick,
 } from 'vue'
 import { supabase } from '@/lib/supabaseClient'
@@ -14,9 +15,40 @@ const currentIndex = ref(0)
 const loading = ref(true)
 const autoplayInterval = ref(null)
 const videoRef = ref(null)
+const isMounted = ref(false)
+const isAutoplaying = ref(true)
+const prefersReducedMotion = ref(false)
 const IMAGE_DURATION = 10000 // 10 seconds for images
+let motionQuery
+const handleMotionPreferenceChange = event => {
+  prefersReducedMotion.value = event.matches
+  if (event.matches) isAutoplaying.value = false
+}
 
-const fetchFeaturedItems = async ({ useSignedUrls = true } = {}) => {
+const shouldAutoplay = computed(() => {
+  return isMounted.value && isAutoplaying.value && !prefersReducedMotion.value
+})
+const currentItem = computed(() => items.value[currentIndex.value])
+
+const getStoragePath = mediaUrl => {
+  const marker = '/featured-content/'
+  return mediaUrl?.split(marker)[1]?.split('?')[0]
+}
+
+const getSignedMediaUrl = async mediaUrl => {
+  const path = getStoragePath(mediaUrl)
+  if (!path) return mediaUrl
+
+  const {
+    data: { signedUrl },
+  } = await supabase.storage
+    .from('featured-content')
+    .createSignedUrl(path, 60 * 60)
+
+  return signedUrl || mediaUrl
+}
+
+const fetchFeaturedItems = async () => {
   try {
     loading.value = true
     const { data, error } = await supabase
@@ -26,32 +58,20 @@ const fetchFeaturedItems = async ({ useSignedUrls = true } = {}) => {
 
     if (error) throw error
 
-    if (!useSignedUrls) {
-      items.value = data
+    if (import.meta.env.SSR) {
+      // Private media URLs expire, so omit them from static HTML. The browser
+      // refreshes each URL on mount while the project descriptions remain crawlable.
+      items.value = data.map(item => ({ ...item, media_url: null }))
       return
     }
 
-    // Signed URLs let the public carousel load media from private storage.
-    const itemsWithSignedUrls = await Promise.all(
-      data.map(async item => {
-        if (item.media_url) {
-          const filename = item.media_url.split('/').pop()
-          const {
-            data: { signedUrl },
-          } = await supabase.storage
-            .from('featured-content')
-            .createSignedUrl(filename, 60 * 60)
-
-          return {
-            ...item,
-            media_url: signedUrl,
-          }
-        }
-        return item
-      }),
+    // The featured-content bucket is private, so browser media needs a fresh URL.
+    items.value = await Promise.all(
+      data.map(async item => ({
+        ...item,
+        media_url: await getSignedMediaUrl(item.media_url),
+      })),
     )
-
-    items.value = itemsWithSignedUrls
   } catch (error) {
     console.error('Error fetching featured items:', error)
   } finally {
@@ -62,13 +82,15 @@ const fetchFeaturedItems = async ({ useSignedUrls = true } = {}) => {
 const startSlideTimer = () => {
   stopSlideTimer()
 
+  if (!shouldAutoplay.value) return
+
   const currentItem = items.value[currentIndex.value]
   if (!currentItem) return
 
   if (currentItem.type === 'image') {
     autoplayInterval.value = setTimeout(next, IMAGE_DURATION)
-  } else if (currentItem.type === 'video' && videoRef.value) {
-    videoRef.value.onended = next
+  } else if (currentItem.type === 'video' && getCurrentVideo()) {
+    getCurrentVideo().onended = next
   }
 }
 
@@ -77,25 +99,42 @@ const stopSlideTimer = () => {
     clearTimeout(autoplayInterval.value)
     autoplayInterval.value = null
   }
-  if (videoRef.value) {
-    videoRef.value.onended = null
+  const video = getCurrentVideo()
+  if (video) {
+    video.onended = null
   }
 }
 
-const next = () => {
+const getCurrentVideo = () => {
+  if (Array.isArray(videoRef.value)) {
+    return videoRef.value[currentIndex.value]
+  }
+
+  return videoRef.value
+}
+
+const next = (pause = false) => {
+  if (pause) isAutoplaying.value = false
   currentIndex.value = (currentIndex.value + 1) % items.value.length
 }
 
 const prev = () => {
+  isAutoplaying.value = false
   currentIndex.value =
     (currentIndex.value - 1 + items.value.length) % items.value.length
 }
 
 const goToSlide = index => {
+  isAutoplaying.value = false
   currentIndex.value = index
 }
 
-const handleMediaLoad = () => {
+const toggleAutoplay = () => {
+  isAutoplaying.value = !isAutoplaying.value
+}
+
+const handleMediaLoad = index => {
+  if (index !== currentIndex.value) return
   startSlideTimer()
 }
 
@@ -111,15 +150,18 @@ const getProgressStyle = index => {
   }
 }
 
-// Watch for changes and handle video playback
-watchEffect(() => {
+watch([items, currentIndex, shouldAutoplay], () => {
+  if (!isMounted.value) return
+
   const currentItem = items.value[currentIndex.value]
   if (currentItem?.type === 'video') {
     nextTick(() => {
-      const video = videoRef.value
-      if (video) {
+      const video = getCurrentVideo()
+      if (video && shouldAutoplay.value) {
         video.currentTime = 0
         video.play()
+      } else if (video) {
+        video.pause()
       }
     })
   }
@@ -127,21 +169,32 @@ watchEffect(() => {
 })
 
 onMounted(async () => {
+  motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+  prefersReducedMotion.value = motionQuery.matches
+  isAutoplaying.value = !motionQuery.matches
+  motionQuery.addEventListener('change', handleMotionPreferenceChange)
+  isMounted.value = true
   await fetchFeaturedItems()
 })
 
 // Include featured projects in the statically rendered document for crawlers.
 onServerPrefetch(async () => {
-  await fetchFeaturedItems({ useSignedUrls: false })
+  await fetchFeaturedItems()
 })
 
 onUnmounted(() => {
   stopSlideTimer()
+  motionQuery?.removeEventListener('change', handleMotionPreferenceChange)
 })
 </script>
 
 <template>
-  <section v-if="items.length > 0" class="featured-carousel">
+  <section
+    v-if="items.length > 0"
+    class="featured-carousel"
+    aria-roledescription="carousel"
+    aria-label="Featured products and projects"
+  >
     <!-- Loading State -->
     <div v-if="loading" class="loading-state">
       <div class="loading-spinner">
@@ -164,10 +217,12 @@ onUnmounted(() => {
       <!-- Background Layer (Blurred) -->
       <div class="background-layer">
         <div
-          v-for="(item, index) in items"
-          :key="`bg-${item.id}`"
-          :class="['background-image', { active: index === currentIndex }]"
-          :style="{ backgroundImage: `url(${item.media_url})` }"
+          class="background-image"
+          :style="{
+            backgroundImage: currentItem?.media_url
+              ? `url(${currentItem.media_url})`
+              : 'none',
+          }"
         ></div>
       </div>
 
@@ -180,36 +235,44 @@ onUnmounted(() => {
           v-for="(item, index) in items"
           :key="item.id"
           class="carousel-item"
+          :aria-hidden="index !== currentIndex"
         >
           <div class="media-wrapper">
             <!-- Image Slide -->
             <img
-              v-if="item.type === 'image'"
+              v-if="item.type === 'image' && item.media_url"
               :src="item.media_url"
               :alt="item.description || 'Featured Alvarado Bit Service project'"
               class="slide-media"
-              @load="handleMediaLoad"
+              :loading="index === currentIndex ? 'eager' : 'lazy'"
+              decoding="async"
+              @load="handleMediaLoad(index)"
             />
 
             <!-- Video Slide -->
             <video
-              v-else
+              v-else-if="item.type === 'video' && item.media_url"
               :src="item.media_url"
               class="slide-media"
               muted
               playsinline
               :aria-label="item.description || 'Featured Alvarado Bit Service project video'"
-              @loadeddata="handleMediaLoad"
+              preload="metadata"
+              @loadeddata="handleMediaLoad(index)"
               ref="videoRef"
             ></video>
           </div>
 
-          <!-- Description Overlay -->
+          <!-- Project details -->
           <div class="slide-overlay">
             <div class="slide-description">
-              <p>{{ item.description }}</p>
-              <div class="media-type-badge" :class="item.type">
-                {{ item.type }}
+              <p class="slide-eyebrow">Featured equipment</p>
+              <h3>{{ item.description || 'Alvarado Bit Service project' }}</h3>
+              <div class="slide-meta">
+                <div class="media-type-badge" :class="item.type">
+                  {{ item.type }}
+                </div>
+                <span class="slide-count">{{ index + 1 }} / {{ items.length }}</span>
               </div>
             </div>
           </div>
@@ -223,11 +286,12 @@ onUnmounted(() => {
         @click="prev"
         aria-label="Previous slide"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            aria-hidden="true"
         >
           <path
             stroke-linecap="round"
@@ -241,14 +305,15 @@ onUnmounted(() => {
       <button
         v-if="items.length > 1"
         class="nav-button next"
-        @click="next"
+        @click="next(true)"
         aria-label="Next slide"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            aria-hidden="true"
         >
           <path
             stroke-linecap="round"
@@ -257,6 +322,17 @@ onUnmounted(() => {
             d="M9 5l7 7-7 7"
           />
         </svg>
+      </button>
+
+      <button
+        v-if="items.length > 1"
+        class="autoplay-button"
+        type="button"
+        @click="toggleAutoplay"
+        :disabled="prefersReducedMotion"
+        :aria-label="isAutoplaying ? 'Pause carousel' : 'Play carousel'"
+      >
+        {{ isAutoplaying ? 'Pause' : 'Play' }}
       </button>
 
       <!-- Progress Indicators -->
@@ -282,8 +358,8 @@ onUnmounted(() => {
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
-  background: var(--navy-blue);
-  border-radius: 12px;
+  background: #111d3d;
+  border-radius: 1rem;
   overflow: hidden;
 }
 
@@ -332,8 +408,7 @@ onUnmounted(() => {
 .carousel-container {
   position: relative;
   width: 100%;
-  height: 0;
-  padding-bottom: 45%; /* 16:9 aspect ratio with some padding */
+  height: clamp(27rem, 44vw, 35rem);
   overflow: hidden;
 }
 
@@ -349,14 +424,10 @@ onUnmounted(() => {
   inset: 0;
   background-size: cover;
   background-position: center;
-  filter: blur(20px);
-  transform: scale(1.1); /* Prevent blur edges from showing */
-  opacity: 0;
-  transition: opacity 0.6s ease;
-}
-
-.background-image.active {
-  opacity: 0.2;
+  filter: blur(32px);
+  transform: scale(1.12);
+  opacity: 0.16;
+  transition: background-image 0.35s ease;
 }
 
 .carousel-track {
@@ -372,9 +443,13 @@ onUnmounted(() => {
   flex: 0 0 100%;
   width: 100%;
   height: 100%;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(17rem, 0.65fr);
+  grid-template-rows: minmax(0, 1fr);
   align-items: center;
-  justify-content: center;
+  gap: clamp(1.25rem, 3vw, 3.5rem);
+  padding: 2rem 6rem 4.75rem;
+  min-height: 0;
 }
 
 .media-wrapper {
@@ -384,7 +459,13 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  min-width: 0;
+  min-height: 0;
+  padding: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 0.9rem;
+  background: rgba(5, 13, 33, 0.42);
+  box-shadow: 0 1.5rem 3rem rgba(0, 0, 0, 0.22);
 }
 
 .slide-media {
@@ -392,46 +473,60 @@ onUnmounted(() => {
   max-height: 100%;
   width: auto;
   height: auto;
+  border-radius: 0.45rem;
   object-fit: contain;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.34);
 }
 
 .slide-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: linear-gradient(
-    0deg,
-    rgba(0, 0, 0, 0.8) 0%,
-    rgba(0, 0, 0, 0.4) 50%,
-    transparent 100%
-  );
-  padding: 4rem 2rem 2rem;
+  position: relative;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  min-height: 0;
+  padding: clamp(1.25rem, 3vw, 2.25rem);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 0.9rem;
+  background: linear-gradient(145deg, rgba(35, 57, 109, 0.94), rgba(15, 28, 61, 0.96));
+  box-shadow: 0 1.5rem 3rem rgba(0, 0, 0, 0.2);
 }
 
 .slide-description {
-  max-width: 800px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 1rem;
+  width: 100%;
 }
 
-.slide-description p {
-  color: white;
-  font-size: 1.25rem;
+.slide-eyebrow {
+  margin: 0 0 0.75rem;
+  color: #b9caf8;
+  font-family: var(--font-primary);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.slide-description h3 {
   margin: 0;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  flex: 1;
+  color: white;
+  font-size: clamp(1.45rem, 2.5vw, 2.5rem);
+  line-height: 1.08;
+  overflow-wrap: anywhere;
+}
+
+.slide-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.5rem;
 }
 
 .media-type-badge {
   padding: 0.5rem 1rem;
-  border-radius: 4px;
-  font-size: 0.875rem;
-  font-weight: 500;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
@@ -445,14 +540,21 @@ onUnmounted(() => {
   color: white;
 }
 
+.slide-count {
+  color: rgba(255, 255, 255, 0.7);
+  font-family: var(--font-primary);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
 .nav-button {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
   width: 3rem;
   height: 3rem;
-  background: rgba(255, 255, 255, 0.9);
-  border: none;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.65);
   border-radius: 50%;
   cursor: pointer;
   display: flex;
@@ -461,7 +563,7 @@ onUnmounted(() => {
   color: var(--navy-blue);
   transition: all 0.2s ease;
   z-index: 2;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.24);
 }
 
 .nav-button:hover {
@@ -481,19 +583,35 @@ onUnmounted(() => {
   right: 1.5rem;
 }
 
+.autoplay-button {
+  position: absolute;
+  right: 2rem;
+  bottom: 1.5rem;
+  z-index: 3;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 0.25rem;
+  background: rgba(17, 29, 61, 0.92);
+  color: white;
+  cursor: pointer;
+  padding: 0.4rem 0.65rem;
+  font: inherit;
+  font-size: 0.875rem;
+}
+
 .carousel-progress {
   position: absolute;
-  bottom: 1.5rem;
-  left: 50%;
-  transform: translateX(-50%);
+  right: 36%;
+  bottom: 1.65rem;
+  left: 6rem;
   display: flex;
   gap: 0.5rem;
   z-index: 2;
 }
 
 .progress-indicator {
-  width: 3rem;
-  height: 4px;
+  flex: 1;
+  min-width: 0;
+  height: 0.3rem;
   padding: 0;
   border: none;
   background: rgba(255, 255, 255, 0.3);
@@ -522,20 +640,6 @@ onUnmounted(() => {
   animation: progress 10s linear;
 }
 
-.progress-bar {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  background: white;
-  transform-origin: left;
-  transition: transform 0.1s linear;
-}
-
-.progress-indicator.active .progress-bar {
-  animation: progress 10s linear;
-}
-
 @keyframes progress {
   from {
     transform: scaleX(0);
@@ -547,11 +651,23 @@ onUnmounted(() => {
 
 @media (max-width: 768px) {
   .carousel-container {
-    padding-bottom: 56.25%;
+    height: clamp(31rem, 145vw, 40rem);
+  }
+
+  .carousel-item {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 1fr) auto;
+    gap: 1rem;
+    padding: 3.75rem 1rem 4.5rem;
   }
 
   .media-wrapper {
     padding: 1rem;
+  }
+
+  .slide-overlay {
+    min-height: 7.75rem;
+    padding: 1.1rem 1.25rem;
   }
 
   .nav-button {
@@ -566,17 +682,38 @@ onUnmounted(() => {
     right: 0.75rem;
   }
 
-  .slide-overlay {
-    padding: 3rem 1rem 1.5rem;
+  .autoplay-button {
+    top: 0.8rem;
+    right: 0.8rem;
+    bottom: auto;
   }
 
-  .slide-description p {
-    font-size: 1rem;
+  .carousel-progress {
+    right: 1rem;
+    bottom: 1rem;
+    left: 1rem;
   }
 
-  .media-type-badge {
-    padding: 0.25rem 0.75rem;
-    font-size: 0.75rem;
+  .slide-eyebrow {
+    margin-bottom: 0.45rem;
+  }
+
+  .slide-meta {
+    margin-top: 0.85rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner,
+  .spinner circle,
+  .progress-indicator.active .progress-bar {
+    animation: none;
+  }
+
+  .background-image,
+  .carousel-track,
+  .nav-button {
+    transition: none;
   }
 }
 </style>

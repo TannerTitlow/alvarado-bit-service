@@ -104,7 +104,11 @@ onMounted(() => {
     <!-- Side Navigation -->
     <aside :class="['sidenav', { 'is-open': isSidenavOpen }]">
       <div class="sidenav-header">
-        <img src="@/assets/abs-logo.png" alt="ABS Logo" class="sidenav-logo" />
+        <img
+          src="@/assets/abs-logo.webp"
+          alt="Alvarado Bit Service logo"
+          class="sidenav-logo"
+        />
         <h2>Admin Dashboard</h2>
       </div>
 

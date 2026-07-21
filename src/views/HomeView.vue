@@ -1,11 +1,11 @@
 <script setup>
 import FeaturedCarousel from '@/components/FeaturedCarousel.vue'
-import mp4Src from '@/assets/videos/abs-2023-mobile.mp4'
+import mp4Src from '@/assets/videos/abs-2023-mobile-fallback.mp4'
 import webmSrc from '@/assets/videos/abs-2023-mobile.webm'
 </script>
 
 <template>
-  <main>
+  <main id="main-content">
     <section class="hero">
       <div class="video-container">
         <video
@@ -13,6 +13,7 @@ import webmSrc from '@/assets/videos/abs-2023-mobile.webm'
           loop
           muted
           playsinline
+          preload="metadata"
           class="hero-video"
           aria-label="Video of water well drilling operations"
         >
@@ -24,7 +25,7 @@ import webmSrc from '@/assets/videos/abs-2023-mobile.webm'
       </div>
       <div class="hero-content">
         <img
-          src="@/assets/abs-logo.png"
+          src="@/assets/abs-logo.webp"
           alt="Alvarado Bit Service logo"
           class="hero-logo"
         />

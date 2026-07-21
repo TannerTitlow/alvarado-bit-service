@@ -57,7 +57,7 @@ const submitForm = async e => {
 </script>
 
 <template>
-  <main class="contact">
+  <main id="main-content" class="contact">
     <section class="contact-hero">
       <div class="content">
         <h1>Contact Us</h1>

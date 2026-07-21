@@ -26,6 +26,11 @@ body {
   padding: 0;
 }
 
+:focus-visible {
+  outline: 3px solid var(--patriot-red);
+  outline-offset: 3px;
+}
+
 /* Common text styles */
 h1,
 h2,

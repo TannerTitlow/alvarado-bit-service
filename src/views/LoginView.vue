@@ -35,7 +35,11 @@ const handleLogin = async e => {
   <main class="admin-login">
     <div class="login-container">
       <div class="login-card">
-        <img src="@/assets/abs-logo.png" alt="ABS Logo" class="login-logo" />
+        <img
+          src="@/assets/abs-logo.webp"
+          alt="Alvarado Bit Service logo"
+          class="login-logo"
+        />
         <h1>Admin Login</h1>
 
         <form @submit="handleLogin" class="login-form">

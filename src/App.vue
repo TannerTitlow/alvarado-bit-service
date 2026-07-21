@@ -93,12 +93,15 @@ useHead(() => {
 
 <template>
   <div class="app">
+    <a v-if="!isAdminRoute" class="skip-link" href="#main-content"
+      >Skip to main content</a
+    >
     <header v-if="!isAdminRoute" class="header">
-      <nav class="nav">
+      <nav class="nav" aria-label="Primary navigation">
         <div class="company-name">
           <RouterLink to="/">
             <img
-              src="@/assets/abs-logo.png"
+              src="@/assets/abs-logo.webp"
               alt="Alvarado Bit Service logo"
               class="logo"
             />
@@ -123,6 +126,22 @@ useHead(() => {
   min-height: 100vh;
   font-family: var(--font-primary);
   background-color: #f5f5f5;
+}
+
+.skip-link {
+  position: fixed;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 2000;
+  transform: translateY(-150%);
+  border-radius: 0.25rem;
+  background: var(--navy-blue);
+  color: white;
+  padding: 0.75rem 1rem;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
 }
 
 .header {
