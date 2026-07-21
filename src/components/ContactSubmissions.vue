@@ -211,22 +211,22 @@ const emit = defineEmits(['refresh-data'])
 <style scoped>
 .contact-submissions {
   height: 100%;
-  overflow-y: auto;
-  padding: 1.5rem;
+  padding: clamp(1rem, 2.5vw, 2rem);
 }
 
 .filters-section {
   background: white;
-  padding: 1.5rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
+  padding: clamp(1rem, 2.5vw, 1.75rem);
+  border: 1px solid #dce3ef;
+  border-radius: 1rem;
+  box-shadow: 0 0.75rem 2rem rgba(25, 42, 78, 0.06);
+  margin-bottom: 1.5rem;
 }
 
 .filters-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(14rem, 1.35fr);
+  gap: 1rem;
 }
 
 .filter-group {
@@ -236,29 +236,51 @@ const emit = defineEmits(['refresh-data'])
 }
 
 .filter-group label {
-  font-size: var(--text-sm);
-  font-weight: var(--fw-medium);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--navy-blue);
 }
 
 .filter-select,
 .search-input {
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 0.375rem;
+  min-height: 2.75rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #ccd7ea;
+  border-radius: 0.6rem;
+  background: #fbfcff;
   font-size: var(--text-base);
+  transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+}
+
+.filter-select:focus,
+.search-input:focus {
+  border-color: #8fa7d1;
+  background: white;
+  box-shadow: 0 0 0 0.2rem rgba(27, 43, 82, 0.1);
+  outline: none;
 }
 
 .submissions-list {
   display: grid;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
 .submission-card {
   background: white;
-  padding: 1.5rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: clamp(1rem, 2.5vw, 1.5rem);
+  border: 1px solid #dce3ef;
+  border-left: 0.3rem solid var(--navy-blue);
+  border-radius: 0.85rem;
+  box-shadow: 0 0.5rem 1.5rem rgba(25, 42, 78, 0.05);
+  transition: border-color 180ms ease, box-shadow 220ms ease, transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.submission-card:hover {
+  border-color: #c6d3e8;
+  box-shadow: 0 0.9rem 1.8rem rgba(25, 42, 78, 0.1);
+  transform: translateY(-0.15rem);
 }
 
 .submission-header {
@@ -276,18 +298,19 @@ const emit = defineEmits(['refresh-data'])
 
 .submission-title h3 {
   color: var(--navy-blue);
-  font-size: var(--text-lg);
-  font-weight: var(--fw-semibold);
+  font-size: 1.1rem;
+  font-weight: 700;
 }
 
 .date {
   color: var(--steel-gray);
-  font-size: var(--text-sm);
+  font-size: 0.8rem;
+  white-space: nowrap;
 }
 
 .submission-details {
   display: grid;
-  gap: 0.5rem;
+  gap: 0.65rem;
 }
 
 .submission-details p {
@@ -295,15 +318,28 @@ const emit = defineEmits(['refresh-data'])
 }
 
 .submission-details .message {
-  margin-top: 0.5rem;
+  margin-top: 0.35rem;
+  padding: 0.85rem 1rem;
+  border-radius: 0.6rem;
+  background: #f5f8fd;
+  border: 1px solid #e2e9f5;
   white-space: pre-line;
 }
 
 .status-select {
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  font-size: var(--text-sm);
-  border: 1px solid #ddd;
+  min-height: 2rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border: 1px solid #ccd7ea;
+  cursor: pointer;
+  transition: box-shadow 180ms ease, transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.status-select:hover {
+  box-shadow: 0 0.2rem 0.5rem rgba(25, 42, 78, 0.12);
+  transform: translateY(-0.05rem);
 }
 
 .status-select.new {
@@ -335,11 +371,12 @@ const emit = defineEmits(['refresh-data'])
   text-align: center;
   padding: 2rem;
   background: white;
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px dashed #c5d1e5;
+  border-radius: 0.85rem;
+  box-shadow: 0 0.5rem 1.5rem rgba(25, 42, 78, 0.04);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 960px) {
   .contact-submissions {
     padding: 1rem;
   }
@@ -349,12 +386,19 @@ const emit = defineEmits(['refresh-data'])
   }
 
   .filters-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1rem;
   }
 
   .submission-card {
     padding: 1rem;
+  }
+
+}
+
+@media (max-width: 600px) {
+  .filters-grid {
+    grid-template-columns: 1fr;
   }
 
   .submission-header {

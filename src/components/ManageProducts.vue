@@ -335,33 +335,34 @@ onMounted(() => {
 
 <style scoped>
 .manage-products {
-  padding: 1.5rem;
+  padding: clamp(1rem, 2.5vw, 2rem);
 }
 
 .header-section {
   background: white;
-  padding: 1.5rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
+  padding: clamp(1rem, 2.5vw, 1.75rem);
+  border: 1px solid #dce3ef;
+  border-radius: 1rem;
+  box-shadow: 0 0.75rem 2rem rgba(25, 42, 78, 0.06);
+  margin-bottom: 1.25rem;
 }
 
 .title-area {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
 }
 
 .title-area h2 {
   color: var(--navy-blue);
-  font-size: 1.75rem;
-  font-weight: 600;
+  font-size: clamp(1.35rem, 2vw, 1.75rem);
+  font-weight: 700;
 }
 
 .filters-area {
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem;
   align-items: center;
 }
 
@@ -371,55 +372,75 @@ onMounted(() => {
 
 .search-input {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 0.375rem;
+  min-height: 2.75rem;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid #ccd7ea;
+  border-radius: 0.6rem;
+  background: #fbfcff;
   font-size: 1rem;
+  transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
 }
 
 .filters {
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .filter-select {
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 0.375rem;
+  min-height: 2.75rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #ccd7ea;
+  border-radius: 0.6rem;
+  background: #fbfcff;
   font-size: 1rem;
   min-width: 180px;
+  transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+}
+
+.search-input:hover,
+.filter-select:hover {
+  border-color: #aabbd6;
+}
+
+.search-input:focus,
+.filter-select:focus {
+  border-color: #8fa7d1;
+  background: white;
+  box-shadow: 0 0 0 0.2rem rgba(27, 43, 82, 0.1);
+  outline: none;
 }
 
 .metrics-section {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .metrics-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
 .metric-card {
-  background: #f8f9fa;
-  padding: 1rem;
-  border-radius: 0.375rem;
-  border: 1px solid #e9ecef;
+  min-height: 8.5rem;
+  padding: 1.25rem;
+  border-radius: 0.9rem;
+  border: 1px solid #dce3ef;
+  background: linear-gradient(145deg, #ffffff, #f5f8fe);
+  box-shadow: 0 0.65rem 1.5rem rgba(25, 42, 78, 0.05);
 }
 
 .metric-card h3 {
   color: var(--navy-blue);
-  font-size: 0.875rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
   margin-bottom: 0.5rem;
 }
 
 .metric-value {
-  font-size: 1.5rem;
-  font-weight: 600;
+  font-size: clamp(1.65rem, 3vw, 2.25rem);
+  font-weight: 700;
   color: var(--navy-blue);
 }
 
@@ -430,35 +451,42 @@ onMounted(() => {
 }
 
 .category-tag {
-  background: var(--navy-blue);
-  color: white;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
+  background: #e9effb;
+  border: 1px solid #cfdcf2;
+  color: var(--navy-blue);
+  padding: 0.3rem 0.55rem;
+  border-radius: 999px;
   font-size: 0.75rem;
 }
 
 .add-product-btn {
-  background: var(--patriot-red);
+  background: linear-gradient(135deg, #c02a3d, #9f1f31);
   color: white;
   padding: 0.75rem 1.5rem;
   border: none;
-  border-radius: 0.375rem;
+  border-radius: 0.6rem;
   cursor: pointer;
   font-weight: 500;
-  transition: background-color 0.2s ease;
+  transition: filter 180ms ease, box-shadow 220ms ease, transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .add-product-btn:hover {
-  background-color: #8b1a28;
+  filter: brightness(1.12);
+  box-shadow: 0 0.5rem 1rem rgba(159, 31, 49, 0.25);
+  transform: translateY(-0.125rem);
+}
+
+.add-product-btn:active {
+  transform: translateY(0);
 }
 
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  gap: 1rem;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 960px) {
   .manage-products {
     padding: 1rem;
   }
@@ -486,6 +514,16 @@ onMounted(() => {
   }
 
   .metrics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 540px) {
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .products-grid {
     grid-template-columns: 1fr;
   }
 }

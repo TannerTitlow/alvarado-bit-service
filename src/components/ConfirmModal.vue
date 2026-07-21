@@ -89,7 +89,8 @@ const handleConfirm = () => {
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(10, 21, 48, 0.52);
+  backdrop-filter: blur(0.3rem);
   display: grid;
   place-items: center;
   padding: 1rem;
@@ -100,8 +101,9 @@ const handleConfirm = () => {
   background: white;
   width: 100%;
   max-width: 400px;
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #dce3ef;
+  border-radius: 0.9rem;
+  box-shadow: 0 1.5rem 4rem rgba(10, 21, 48, 0.26);
   overflow: hidden;
 }
 
@@ -110,7 +112,7 @@ const handleConfirm = () => {
   align-items: center;
   justify-content: space-between;
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #dce3ef;
 }
 
 .modal-title {
@@ -123,10 +125,22 @@ const handleConfirm = () => {
 .close-button {
   padding: 0.5rem;
   font-size: 1.5rem;
-  background: none;
-  border: none;
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid #dce3ef;
+  border-radius: 0.5rem;
+  background: #f7f9fd;
   cursor: pointer;
   color: #666;
+  transition: background-color 180ms ease, color 180ms ease, transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.close-button:hover {
+  background: #edf2fb;
+  color: var(--navy-blue);
+  transform: rotate(4deg);
 }
 
 .modal-body {
@@ -144,37 +158,42 @@ const handleConfirm = () => {
   display: flex;
   gap: 1rem;
   padding: 1rem 1.5rem;
-  border-top: 1px solid #e5e7eb;
+  justify-content: flex-end;
+  border-top: 1px solid #dce3ef;
   background: white;
 }
 
 .secondary-btn,
 .delete-btn {
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.375rem;
-  font-weight: 500;
+  padding: 0.7rem 1.1rem;
+  border-radius: 0.6rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, filter 180ms ease, transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .secondary-btn {
-  background: white;
-  border: 1px solid #ddd;
+  background: #f7f9fd;
+  border: 1px solid #ccd7ea;
   color: var(--steel-gray);
 }
 
 .secondary-btn:hover {
   border-color: var(--steel-gray);
+  box-shadow: 0 0.3rem 0.65rem rgba(25, 42, 78, 0.1);
+  transform: translateY(-0.1rem);
 }
 
 .delete-btn {
-  background: #dc2626;
+  background: linear-gradient(135deg, #c02a3d, #9f1f31);
   color: white;
   border: none;
 }
 
 .delete-btn:hover {
-  background-color: #b91c1c;
+  filter: brightness(1.12);
+  box-shadow: 0 0.35rem 0.75rem rgba(178, 34, 52, 0.22);
+  transform: translateY(-0.1rem);
 }
 
 .modal-closing {
@@ -193,6 +212,10 @@ const handleConfirm = () => {
 @media (max-width: 768px) {
   .modal-content {
     margin: 0 1rem;
+  }
+
+  .modal-footer > button {
+    flex: 1;
   }
 }
 </style>

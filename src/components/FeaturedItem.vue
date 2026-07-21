@@ -124,7 +124,7 @@ const moveDown = () => {
 
 <template>
   <div
-    class="featured-item"
+    class="featured-item-shell"
     :class="{
       'is-dragged': isDragged,
       'is-drag-target': isDragTarget,
@@ -135,7 +135,8 @@ const moveDown = () => {
     @dragover="handleDragOver"
     @dragenter.prevent
   >
-    <div class="item-content">
+    <div class="featured-item">
+      <div class="item-content">
       <!-- Desktop Drag Handle -->
       <div
         class="drag-handle desktop-only"
@@ -229,12 +230,12 @@ const moveDown = () => {
       </div>
 
       <!-- Item Details -->
-      <div class="item-details">
+        <div class="item-details">
         <p class="item-description">{{ item.description }}</p>
-        <div class="item-metadata">
-          <span class="type-badge" :class="item.type">
-            {{ item.type }}
-          </span>
+          <div class="item-metadata">
+            <span class="type-badge" :class="item.type">
+              {{ item.type === 'image' ? 'Image' : 'Video' }}
+            </span>
           <span class="order-badge">Order: {{ item.order_index + 1 }}</span>
         </div>
 
@@ -274,23 +275,37 @@ const moveDown = () => {
             Delete
           </button>
         </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.featured-item {
-  background: white;
-  border-radius: 0.5rem;
-  overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+.featured-item-shell {
+  height: 100%;
   position: relative;
-  border: 2px solid transparent;
 }
 
-.featured-item.is-dragged {
+.featured-item {
+  height: 100%;
+  background: white;
+  border-radius: 0.85rem;
+  overflow: hidden;
+  box-shadow: 0 0.6rem 1.5rem rgba(25, 42, 78, 0.06);
+  will-change: transform;
+  transition: border-color 220ms ease, box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1), transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+  border: 1px solid #dce3ef;
+}
+
+.featured-item:hover {
+  border-color: #c6d3e8;
+  transform: translateY(-0.25rem);
+  box-shadow: 0 1.1rem 2.2rem rgba(25, 42, 78, 0.14);
+}
+
+.featured-item-shell.is-dragged .featured-item {
   transform: scale(1.02);
   border-color: var(--navy-blue);
   z-index: 10;
@@ -310,10 +325,17 @@ const moveDown = () => {
   justify-content: center;
   z-index: 10;
   cursor: grab;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 0.2rem 0.5rem rgba(10, 21, 48, 0.12);
+  transition: background-color 180ms ease, box-shadow 180ms ease, transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.is-dragged .drag-handle {
+.drag-handle:hover {
+  background: white;
+  box-shadow: 0 0.45rem 0.9rem rgba(10, 21, 48, 0.18);
+  transform: scale(1.06);
+}
+
+.featured-item-shell.is-dragged .drag-handle {
   cursor: grabbing;
 }
 
@@ -328,7 +350,8 @@ const moveDown = () => {
 .media-container {
   position: relative;
   padding-top: 56.25%;
-  background: #f3f4f6;
+  background: #eaf0fb;
+  overflow: hidden;
 }
 
 .media-preview {
@@ -342,29 +365,49 @@ const moveDown = () => {
 
 /* Item Details */
 .item-details {
-  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 10.5rem;
+  padding: 1.1rem;
 }
 
 .item-description {
-  color: var(--steel-gray);
-  margin-bottom: 1rem;
+  color: #5d6b83;
+  min-height: 3rem;
+  margin-bottom: 0.75rem;
   font-size: 0.875rem;
   line-height: 1.5;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .item-metadata {
   display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e5eaf3;
 }
 
 .type-badge,
 .order-badge {
   display: inline-block;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
+  padding: 0.3rem 0.55rem;
+  border-radius: 999px;
   font-size: 0.75rem;
-  font-weight: 500;
+  font-family: var(--font-secondary);
+  font-weight: 600;
+  transition: background-color 180ms ease, box-shadow 180ms ease, transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.featured-item:hover .type-badge,
+.featured-item:hover .order-badge {
+  box-shadow: 0 0.2rem 0.45rem rgba(25, 42, 78, 0.1);
+  transform: translateY(-0.05rem);
 }
 
 .type-badge.image {
@@ -378,14 +421,16 @@ const moveDown = () => {
 }
 
 .order-badge {
-  background: var(--navy-blue);
-  color: white;
+  background: #e9effb;
+  border: 1px solid #cfdcf2;
+  color: var(--navy-blue);
 }
 
 /* Action Buttons */
 .item-actions {
   display: flex;
   gap: 0.5rem;
+  margin-top: auto;
 }
 
 .action-icon {
@@ -404,8 +449,9 @@ const moveDown = () => {
   border: none;
   border-radius: 0.25rem;
   cursor: pointer;
-  font-weight: 500;
-  transition: background-color 0.2s ease;
+  font-family: var(--font-secondary);
+  font-weight: 600;
+  transition: background-color 180ms ease, box-shadow 180ms ease, transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .edit-btn {
@@ -414,16 +460,20 @@ const moveDown = () => {
 }
 
 .edit-btn:hover {
-  background-color: #141e3c;
+  background-color: #2a4073;
+  box-shadow: 0 0.3rem 0.65rem rgba(27, 43, 82, 0.22);
+  transform: translateY(-0.1rem);
 }
 
 .delete-btn {
-  background: #dc2626;
+  background: var(--patriot-red);
   color: white;
 }
 
 .delete-btn:hover {
-  background-color: #b91c1c;
+  background-color: #c83a4d;
+  box-shadow: 0 0.3rem 0.65rem rgba(178, 34, 52, 0.22);
+  transform: translateY(-0.1rem);
 }
 
 /* Mobile Reorder Controls */
@@ -450,7 +500,7 @@ const moveDown = () => {
   align-items: center;
   justify-content: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-  transition: all 0.2s ease;
+  transition: background-color 180ms ease, box-shadow 180ms ease, transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .reorder-btn:disabled {
@@ -460,7 +510,8 @@ const moveDown = () => {
 
 .reorder-btn:not(:disabled):hover {
   background: white;
-  transform: scale(1.05);
+  box-shadow: 0 0.4rem 0.85rem rgba(10, 21, 48, 0.16);
+  transform: scale(1.08);
 }
 
 .reorder-btn:not(:disabled):active {
@@ -489,6 +540,14 @@ const moveDown = () => {
 
 /* Mobile Responsive */
 @media (max-width: 768px) {
+  .item-details {
+    min-height: 0;
+  }
+
+  .item-description {
+    min-height: 0;
+  }
+
   .item-actions {
     flex-direction: column;
   }

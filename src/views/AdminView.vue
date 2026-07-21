@@ -253,7 +253,15 @@ onMounted(() => {
 .admin {
   min-height: 100vh;
   display: flex;
-  background-color: #f5f5f5;
+  background: #f3f6fb;
+}
+
+/* Keep the display face for headings; controls need a cleaner working UI typeface. */
+.admin :deep(button),
+.admin :deep(input),
+.admin :deep(select),
+.admin :deep(textarea) {
+  font-family: var(--font-secondary);
 }
 
 /* Mobile Header */
@@ -263,18 +271,24 @@ onMounted(() => {
   top: 0;
   left: 0;
   right: 0;
-  height: 60px;
-  background: white;
-  padding: 0 1rem;
+  height: 4.5rem;
+  background: rgba(255, 255, 255, 0.96);
+  padding: 0 1.25rem;
   z-index: 40;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #dce3ef;
+  box-shadow: 0 0.25rem 1rem rgba(21, 38, 77, 0.06);
   align-items: center;
 }
 
 .menu-toggle {
-  background: none;
-  border: none;
-  padding: 0.5rem;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: #edf2fb;
+  border: 1px solid #dce5f5;
+  border-radius: 0.6rem;
+  padding: 0;
   cursor: pointer;
   color: var(--navy-blue);
 }
@@ -285,15 +299,15 @@ onMounted(() => {
 }
 
 .mobile-title {
-  margin-left: 1rem;
-  font-size: 1.25rem;
+  margin-left: 0.85rem;
+  font-size: 1.05rem;
   color: var(--navy-blue);
 }
 
 /* Sidenav */
 .sidenav {
-  width: 280px;
-  background: var(--navy-blue);
+  width: 17.5rem;
+  background: linear-gradient(165deg, #182b59 0%, #101c3d 72%);
   color: white;
   display: flex;
   flex-direction: column;
@@ -314,7 +328,7 @@ onMounted(() => {
 }
 
 .sidenav-header {
-  padding: 1.5rem;
+  padding: 1.75rem 1.5rem;
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -322,19 +336,20 @@ onMounted(() => {
 }
 
 .sidenav-logo {
-  width: 40px;
-  height: 40px;
+  width: 2.75rem;
+  height: 2.75rem;
   border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.22);
 }
 
 .sidenav-header h2 {
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: 1.1rem;
+  font-weight: 700;
 }
 
 .sidenav-menu {
   flex: 1;
-  padding: 1.5rem 1rem;
+  padding: 1.5rem 0.9rem;
 }
 
 .nav-item {
@@ -342,14 +357,15 @@ onMounted(() => {
   align-items: center;
   gap: 0.75rem;
   width: 100%;
-  padding: 0.75rem 1rem;
+  padding: 0.85rem 1rem;
   color: rgba(255, 255, 255, 0.8);
   background: transparent;
   border: none;
-  border-radius: 0.375rem;
+  border-radius: 0.65rem;
   cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 1rem;
+  transition: background-color 180ms ease, color 180ms ease, transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  font-size: 0.95rem;
+  font-weight: 600;
   text-align: left;
 }
 
@@ -358,9 +374,14 @@ onMounted(() => {
   color: white;
 }
 
+.nav-item:hover:not(.active) {
+  transform: translateX(0.2rem);
+}
+
 .nav-item.active {
-  background: var(--patriot-red);
+  background: linear-gradient(135deg, #c02a3d, #9f1f31);
   color: white;
+  box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.18);
 }
 
 .nav-icon {
@@ -370,7 +391,7 @@ onMounted(() => {
 }
 
 .sidenav-footer {
-  padding: 1.5rem;
+  padding: 1.25rem 1.5rem 1.5rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -389,9 +410,9 @@ onMounted(() => {
   color: rgba(255, 255, 255, 0.8);
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 0.375rem;
+  border-radius: 0.65rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease, transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
   font-size: 1rem;
   text-decoration: none;
 }
@@ -399,6 +420,7 @@ onMounted(() => {
 .home-btn:hover {
   background: rgba(255, 255, 255, 0.1);
   color: white;
+  transform: translateX(0.2rem);
 }
 
 .logout-btn {
@@ -410,9 +432,9 @@ onMounted(() => {
   color: rgba(255, 255, 255, 0.8);
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 0.375rem;
+  border-radius: 0.65rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease, transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
   font-size: 1rem;
   font-family: var(--font-primary);
 }
@@ -420,35 +442,46 @@ onMounted(() => {
 .logout-btn:hover {
   background: rgba(255, 255, 255, 0.1);
   color: white;
+  transform: translateX(0.2rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin :deep(*),
+  .admin :deep(*::before),
+  .admin :deep(*::after) {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Main Content */
 .main-content {
   flex: 1;
-  margin-left: 280px;
+  margin-left: 17.5rem;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
 .content-header {
-  background: white;
-  padding: 1.5rem 2rem;
-  border-bottom: 1px solid #eee;
+  background: rgba(255, 255, 255, 0.94);
+  padding: 1.5rem clamp(1.25rem, 3vw, 2.5rem);
+  border-bottom: 1px solid #dce3ef;
 }
 
 .content-header h1 {
   color: var(--navy-blue);
-  font-size: 1.5rem;
-  font-weight: 600;
+  font-size: clamp(1.35rem, 2vw, 1.75rem);
+  font-weight: 700;
 }
 
 .content-body {
   flex: 1;
-  background: #f5f5f5;
+  background: #f3f6fb;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 960px) {
   .mobile-header {
     display: flex;
   }
@@ -467,19 +500,12 @@ onMounted(() => {
 
   .sidenav-overlay {
     display: block;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-  }
-
-  .sidenav-overlay:has(+ .sidenav.is-open) {
-    opacity: 1;
-    pointer-events: auto;
+    background: rgba(10, 21, 48, 0.48);
   }
 
   .main-content {
     margin-left: 0;
-    padding-top: 60px;
+    padding-top: 4.5rem;
   }
 }
 </style>

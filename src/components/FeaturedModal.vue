@@ -287,7 +287,8 @@ const changeMedia = () => {
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(10, 21, 48, 0.58);
+  backdrop-filter: blur(0.3rem);
   display: grid;
   place-items: center;
   padding: 1rem;
@@ -297,10 +298,13 @@ const changeMedia = () => {
 .modal-content {
   background: white;
   width: 100%;
-  max-width: 600px;
-  max-height: 90vh;
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  max-width: 42rem;
+  max-height: calc(100dvh - 2rem);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #dce3ef;
+  border-radius: 1rem;
+  box-shadow: 0 1.5rem 4rem rgba(10, 21, 48, 0.28);
   overflow: hidden;
   position: relative;
 }
@@ -361,24 +365,36 @@ const changeMedia = () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 1.15rem 1.5rem;
+  border-bottom: 1px solid #dce3ef;
+  background: linear-gradient(135deg, #ffffff, #f5f8fe);
 }
 
 .modal-title {
   color: var(--navy-blue);
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: 1.3rem;
+  font-weight: 700;
   margin: 0;
 }
 
 .close-button {
-  padding: 0.5rem;
-  font-size: 1.5rem;
-  background: none;
-  border: none;
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  font-size: 1.35rem;
+  background: #f7f9fd;
+  border: 1px solid #dce3ef;
+  border-radius: 0.55rem;
   cursor: pointer;
   color: #666;
+  transition: color 180ms ease, transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.close-button:hover:not(:disabled) {
+  color: var(--navy-blue);
+  transform: rotate(4deg);
 }
 
 .close-button:disabled {
@@ -389,47 +405,56 @@ const changeMedia = () => {
 .featured-form {
   display: flex;
   flex-direction: column;
-  height: calc(90vh - 60px);
+  min-height: 0;
 }
 
 .form-body {
-  padding: 1.5rem;
+  padding: 1.35rem 1.5rem;
   overflow-y: auto;
 }
 
 .form-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.15rem;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
+  margin-bottom: 0.45rem;
+  font-family: var(--font-secondary);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   color: var(--navy-blue);
 }
 
 select,
 textarea {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 0.375rem;
+  min-height: 2.75rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #ccd7ea;
+  border-radius: 0.6rem;
+  background: #fbfcff;
   font-size: 1rem;
-  transition: border-color 0.2s ease;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
 }
 
 select:focus,
 textarea:focus {
   outline: none;
   border-color: var(--navy-blue);
+  box-shadow: 0 0 0 0.2rem rgba(27, 43, 82, 0.1);
 }
 
 .upload-area {
-  border: 2px dashed #ddd;
-  border-radius: 0.5rem;
-  padding: 2rem;
+  min-height: 14rem;
+  border: 1px dashed #afbed6;
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  background: #f8faff;
   text-align: center;
-  transition: all 0.2s ease;
+  transition: border-color 180ms ease, background-color 180ms ease, box-shadow 220ms ease, transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
   cursor: pointer;
 }
 
@@ -437,6 +462,8 @@ textarea:focus {
 .upload-area.is-dragging {
   border-color: var(--navy-blue);
   background: #f8fafc;
+  box-shadow: 0 0.65rem 1.25rem rgba(25, 42, 78, 0.08);
+  transform: translateY(-0.1rem);
 }
 
 .hidden-file-input {
@@ -447,7 +474,9 @@ textarea:focus {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  min-height: 12.5rem;
+  justify-content: center;
+  gap: 0.75rem;
 }
 
 .upload-icon {
@@ -475,11 +504,19 @@ textarea:focus {
 
 .media-preview-container {
   position: relative;
+  display: grid;
+  min-height: 12.5rem;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  background: #edf2fa;
 }
 
 .media-preview {
-  width: 100%;
-  max-height: 300px;
+  display: block;
+  width: auto;
+  max-width: 100%;
+  max-height: 18rem;
   object-fit: contain;
   border-radius: 0.375rem;
 }
@@ -492,44 +529,52 @@ textarea:focus {
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(27, 43, 82, 0.9);
   color: white;
   border: none;
   padding: 0.5rem 1rem;
-  border-radius: 0.25rem;
+  border-radius: 0.5rem;
+  font-family: var(--font-secondary);
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background-color 180ms ease, transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .clear-file-btn:hover {
-  background: rgba(0, 0, 0, 0.7);
+  background: #2a4073;
+  transform: translateY(-0.1rem);
 }
 
 .modal-footer {
   display: flex;
   gap: 1rem;
+  justify-content: flex-end;
   padding: 1rem 1.5rem;
-  border-top: 1px solid #e5e7eb;
-  background: white;
+  border-top: 1px solid #dce3ef;
+  background: #f8faff;
 }
 
 .secondary-btn,
 .save-btn {
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.375rem;
-  font-weight: 500;
+  min-width: 6.5rem;
+  padding: 0.7rem 1.1rem;
+  border-radius: 0.6rem;
+  font-family: var(--font-secondary);
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 180ms ease, box-shadow 180ms ease, filter 180ms ease, transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .secondary-btn {
   background: white;
-  border: 1px solid #ddd;
-  color: var(--steel-gray);
+  border: 1px solid #ccd7ea;
+  color: #52627b;
 }
 
 .secondary-btn:hover:not(:disabled) {
   border-color: var(--steel-gray);
+  box-shadow: 0 0.3rem 0.65rem rgba(25, 42, 78, 0.1);
+  transform: translateY(-0.1rem);
 }
 
 .save-btn {
@@ -539,7 +584,9 @@ textarea:focus {
 }
 
 .save-btn:hover:not(:disabled) {
-  background-color: #8b1a28;
+  background-color: #c83a4d;
+  box-shadow: 0 0.35rem 0.75rem rgba(178, 34, 52, 0.22);
+  transform: translateY(-0.1rem);
 }
 
 .secondary-btn:disabled,
@@ -563,8 +610,7 @@ textarea:focus {
 
 @media (max-width: 768px) {
   .modal-content {
-    height: calc(100vh - 2rem);
-    max-height: calc(100vh - 2rem);
+    max-height: calc(100dvh - 1rem);
   }
 
   .upload-area {
@@ -573,6 +619,10 @@ textarea:focus {
 
   .modal-footer {
     padding: 1rem;
+  }
+
+  .modal-footer > button {
+    flex: 1;
   }
 }
 </style>

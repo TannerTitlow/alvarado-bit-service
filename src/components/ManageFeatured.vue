@@ -595,15 +595,16 @@ onMounted(fetchItems)
 
 <style scoped>
 .manage-featured {
-  padding: 1.5rem;
+  padding: clamp(1rem, 2.5vw, 2rem);
 }
 
 .header-section {
   background: white;
-  padding: 1.5rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
+  padding: clamp(1rem, 2.5vw, 1.75rem);
+  border: 1px solid #dce3ef;
+  border-radius: 1rem;
+  box-shadow: 0 0.75rem 2rem rgba(25, 42, 78, 0.06);
+  margin-bottom: 1.25rem;
 }
 
 .title-area {
@@ -615,35 +616,42 @@ onMounted(fetchItems)
 
 .title-area h2 {
   color: var(--navy-blue);
-  font-size: 1.75rem;
-  font-weight: 600;
+  font-size: clamp(1.35rem, 2vw, 1.75rem);
+  font-weight: 700;
 }
 
 .help-text {
-  color: var(--steel-gray);
-  font-size: 0.875rem;
+  color: #5d6b83;
+  font-size: 0.9rem;
+  line-height: 1.55;
 }
 
 .add-item-btn {
-  background: var(--patriot-red);
+  background: linear-gradient(135deg, #c02a3d, #9f1f31);
   color: white;
   padding: 0.75rem 1.5rem;
   border: none;
-  border-radius: 0.375rem;
+  border-radius: 0.6rem;
   cursor: pointer;
   font-weight: 500;
-  transition: background-color 0.2s ease;
+  transition: filter 180ms ease, box-shadow 220ms ease, transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .add-item-btn:hover {
-  background-color: #8b1a28;
+  filter: brightness(1.12);
+  box-shadow: 0 0.5rem 1rem rgba(159, 31, 49, 0.25);
+  transform: translateY(-0.125rem);
+}
+
+.add-item-btn:active {
+  transform: translateY(0);
 }
 
 .featured-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
-  padding: 0.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  gap: 1rem;
+  padding: 0;
   min-height: 200px;
   position: relative;
 }
@@ -653,9 +661,10 @@ onMounted(fetchItems)
   text-align: center;
   padding: 2rem;
   background: white;
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  color: var(--steel-gray);
+  border: 1px dashed #c5d1e5;
+  border-radius: 0.85rem;
+  box-shadow: 0 0.5rem 1.5rem rgba(25, 42, 78, 0.04);
+  color: #5d6b83;
 }
 
 .loading-state {
@@ -723,7 +732,7 @@ onMounted(fetchItems)
   transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 960px) {
   .manage-featured {
     padding: 1rem;
   }
@@ -747,13 +756,20 @@ onMounted(fetchItems)
   }
 
   .featured-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1rem;
     padding: 0.75rem;
   }
 
   .grid-leave-active {
     width: calc(100% - 1rem);
+  }
+}
+
+@media (max-width: 600px) {
+  .featured-grid {
+    grid-template-columns: 1fr;
+    padding: 0;
   }
 }
 
