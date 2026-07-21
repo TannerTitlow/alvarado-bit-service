@@ -1,6 +1,4 @@
 User-agent: *
 Allow: /
-Disallow: /admin
-Disallow: /admin/
 
-Sitemap: https://www.alvaradobitservice.com/sitemap.xml
+Sitemap: https://alvaradobitservice.com/sitemap.xml

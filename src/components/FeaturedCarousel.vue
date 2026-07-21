@@ -1,5 +1,12 @@
 <script setup>
-import { ref, onMounted, onUnmounted, watchEffect, nextTick } from 'vue'
+import {
+  ref,
+  onMounted,
+  onUnmounted,
+  onServerPrefetch,
+  watchEffect,
+  nextTick,
+} from 'vue'
 import { supabase } from '@/lib/supabaseClient'
 
 const items = ref([])
@@ -9,7 +16,7 @@ const autoplayInterval = ref(null)
 const videoRef = ref(null)
 const IMAGE_DURATION = 10000 // 10 seconds for images
 
-const fetchFeaturedItems = async () => {
+const fetchFeaturedItems = async ({ useSignedUrls = true } = {}) => {
   try {
     loading.value = true
     const { data, error } = await supabase
@@ -19,7 +26,12 @@ const fetchFeaturedItems = async () => {
 
     if (error) throw error
 
-    // Get signed URLs for all media
+    if (!useSignedUrls) {
+      items.value = data
+      return
+    }
+
+    // Signed URLs let the public carousel load media from private storage.
     const itemsWithSignedUrls = await Promise.all(
       data.map(async item => {
         if (item.media_url) {
@@ -118,6 +130,11 @@ onMounted(async () => {
   await fetchFeaturedItems()
 })
 
+// Include featured projects in the statically rendered document for crawlers.
+onServerPrefetch(async () => {
+  await fetchFeaturedItems({ useSignedUrls: false })
+})
+
 onUnmounted(() => {
   stopSlideTimer()
 })
@@ -169,7 +186,7 @@ onUnmounted(() => {
             <img
               v-if="item.type === 'image'"
               :src="item.media_url"
-              :alt="item.description"
+              :alt="item.description || 'Featured Alvarado Bit Service project'"
               class="slide-media"
               @load="handleMediaLoad"
             />
@@ -181,6 +198,7 @@ onUnmounted(() => {
               class="slide-media"
               muted
               playsinline
+              :aria-label="item.description || 'Featured Alvarado Bit Service project video'"
               @loadeddata="handleMediaLoad"
               ref="videoRef"
             ></video>

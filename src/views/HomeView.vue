@@ -8,24 +8,36 @@ import webmSrc from '@/assets/videos/abs-2023-mobile.webm'
   <main>
     <section class="hero">
       <div class="video-container">
-        <video autoplay loop muted playsinline class="hero-video">
+        <video
+          autoplay
+          loop
+          muted
+          playsinline
+          class="hero-video"
+          aria-label="Video of water well drilling operations"
+        >
           <source :src="webmSrc" type="video/webm" />
           <source :src="mp4Src" type="video/mp4" />
+          Video of Alvarado Bit Service water well drilling operations.
         </video>
         <div class="overlay"></div>
       </div>
       <div class="hero-content">
-        <img src="@/assets/abs-logo.png" alt="ABS Logo" class="hero-logo" />
+        <img
+          src="@/assets/abs-logo.png"
+          alt="Alvarado Bit Service logo"
+          class="hero-logo"
+        />
         <h1>American-Made Excellence in Drilling</h1>
         <p>
           Serving the nation with innovative drill bits and superior service
           since 1976. Available 24/7 with a 100% satisfaction guarantee.
         </p>
         <div class="cta-buttons">
-          <RouterLink to="/contact" class="cta-primary"
+          <RouterLink to="/contact/" class="cta-primary"
             >Get in Touch</RouterLink
           >
-          <RouterLink to="/about" class="cta-secondary">Learn More</RouterLink>
+          <RouterLink to="/about/" class="cta-secondary">Learn More</RouterLink>
         </div>
       </div>
     </section>

@@ -1,22 +1,18 @@
 import { writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
-const SITE_URL = 'https://www.alvaradobitservice.com'
-const lastmod = new Date().toISOString().slice(0, 10)
+const SITE_URL = 'https://alvaradobitservice.com'
 
 const routes = [
-  { path: '/', changefreq: 'weekly', priority: '1.0' },
-  { path: '/about', changefreq: 'monthly', priority: '0.8' },
-  { path: '/contact', changefreq: 'monthly', priority: '0.9' },
+  { path: '/' },
+  { path: '/about/' },
+  { path: '/contact/' },
 ]
 
 const urls = routes
   .map(
     route => `  <url>
-    <loc>${SITE_URL}${route.path === '/' ? '/' : route.path}</loc>
-    <lastmod>${lastmod}</lastmod>
-    <changefreq>${route.changefreq}</changefreq>
-    <priority>${route.priority}</priority>
+    <loc>${SITE_URL}${route.path}</loc>
   </url>`,
   )
   .join('\n')

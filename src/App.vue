@@ -97,14 +97,18 @@ useHead(() => {
       <nav class="nav">
         <div class="company-name">
           <RouterLink to="/">
-            <img src="@/assets/abs-logo.png" alt="ABS Logo" class="logo" />
+            <img
+              src="@/assets/abs-logo.png"
+              alt="Alvarado Bit Service logo"
+              class="logo"
+            />
             <span>Alvarado Bit Service</span>
           </RouterLink>
         </div>
         <div class="nav-links">
           <RouterLink to="/" class="nav-link">Home</RouterLink>
-          <RouterLink to="/about" class="nav-link">About</RouterLink>
-          <RouterLink to="/contact" class="nav-link">Contact</RouterLink>
+          <RouterLink to="/about/" class="nav-link">About</RouterLink>
+          <RouterLink to="/contact/" class="nav-link">Contact</RouterLink>
         </div>
       </nav>
     </header>

@@ -1,4 +1,4 @@
-export const SITE_URL = 'https://www.alvaradobitservice.com'
+export const SITE_URL = 'https://alvaradobitservice.com'
 export const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.jpg`
 
 export const DEFAULT_SEO = {
@@ -47,7 +47,7 @@ export function getCanonicalUrl(path = '/') {
   }
 
   const normalizedPath = path.startsWith('/') ? path : `/${path}`
-  return `${SITE_URL}${normalizedPath.replace(/\/+$/, '')}`
+  return `${SITE_URL}${normalizedPath.replace(/\/+$/, '')}/`
 }
 
 export function createOrganizationSchema() {
@@ -135,8 +135,8 @@ export function createContactPageSchema() {
   return {
     '@context': 'https://schema.org',
     '@type': 'ContactPage',
-    '@id': `${SITE_URL}/contact#webpage`,
-    url: `${SITE_URL}/contact`,
+    '@id': `${SITE_URL}/contact/#webpage`,
+    url: `${SITE_URL}/contact/`,
     name: 'Contact Alvarado Bit Service',
     mainEntity: {
       '@id': `${SITE_URL}/#service-area-business`,

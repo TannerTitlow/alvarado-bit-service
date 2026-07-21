@@ -127,7 +127,7 @@
             relationships across the United States.
           </p>
           <div class="cta-wrapper">
-            <RouterLink to="/contact" class="cta-primary"
+            <RouterLink to="/contact/" class="cta-primary"
               >Get in Touch</RouterLink
             >
           </div>
