@@ -13,6 +13,10 @@ const props = defineProps({
   saving: {
     type: Boolean,
     default: false
+  },
+  savingMessage: {
+    type: String,
+    default: ''
   }
 })
 
@@ -61,7 +65,8 @@ const handleClose = () => {
 }
 
 const validateFile = (file) => {
-  const maxSize = 50 * 1024 * 1024 // 50MB max size
+  const maxSize = formData.value.type === 'video' ? 50 : 100
+  const maxBytes = maxSize * 1024 * 1024
 
   if (formData.value.type === 'image' && !file.type.startsWith('image/')) {
     alert('Please select an image file')
@@ -73,8 +78,8 @@ const validateFile = (file) => {
     return false
   }
 
-  if (file.size > maxSize) {
-    alert('File size must be less than 50MB')
+  if (file.size > maxBytes) {
+    alert(`${formData.value.type === 'image' ? 'Images' : 'Videos'} must be less than ${maxSize}MB`)
     return false
   }
 
@@ -135,12 +140,19 @@ const handleSubmit = () => {
   })
 }
 
-const clearFile = () => {
+const openFilePicker = () => {
+  if (!props.saving) fileInputRef.value?.click()
+}
+
+const changeMedia = () => {
+  if (props.saving) return
+
   formData.value.file = null
   mediaPreview.value = props.item?.media_url || null
   if (fileInputRef.value) {
     fileInputRef.value.value = ''
   }
+  openFilePicker()
 }
 </script>
 
@@ -161,7 +173,7 @@ const clearFile = () => {
               stroke-linecap="round"
             />
           </svg>
-          <span>{{ formData.file ? 'Uploading...' : 'Saving...' }}</span>
+          <span>{{ savingMessage || (formData.file ? 'Uploading...' : 'Saving...') }}</span>
         </div>
       </div>
 
@@ -210,9 +222,13 @@ const clearFile = () => {
               </svg>
               <p class="upload-text">
                 Drop your {{ formData.type }} here or
-                <span class="browse-text" @click="fileInputRef?.click()">browse</span>
+                <span class="browse-text" @click="openFilePicker">browse</span>
               </p>
-              <p class="upload-hint">Maximum file size: 50MB</p>
+              <p class="upload-hint">
+                {{ formData.type === 'image'
+                  ? 'Photos are optimized automatically before upload.'
+                  : 'Maximum video size: 50MB' }}
+              </p>
             </div>
 
             <!-- Media Preview -->
@@ -221,7 +237,12 @@ const clearFile = () => {
                 v-if="formData.type === 'image'"
                 :src="mediaPreview"
                 alt="Preview"
-                class="media-preview"
+                class="media-preview media-preview-button"
+                role="button"
+                tabindex="0"
+                @click="openFilePicker"
+                @keydown.enter.prevent="openFilePicker"
+                @keydown.space.prevent="openFilePicker"
               >
               <video
                 v-else
@@ -230,7 +251,7 @@ const clearFile = () => {
                 class="media-preview"
               ></video>
 
-              <button type="button" @click="clearFile" class="clear-file-btn">
+              <button type="button" @click="changeMedia" class="clear-file-btn">
                 Change {{ formData.type }}
               </button>
             </div>
@@ -461,6 +482,10 @@ textarea:focus {
   max-height: 300px;
   object-fit: contain;
   border-radius: 0.375rem;
+}
+
+.media-preview-button {
+  cursor: pointer;
 }
 
 .clear-file-btn {

@@ -12,6 +12,9 @@ const editingItem = ref(null)
 const modalMode = ref('add')
 const showDeleteModal = ref(false)
 const deletingItemId = ref(null)
+const savingMessage = ref('')
+const MAX_IMAGE_DIMENSION = 2048
+const TARGET_IMAGE_SIZE = 1.2 * 1024 * 1024
 const dragState = ref({
   isDragging: false,
   draggedId: null,
@@ -79,6 +82,55 @@ const getFilenameFromUrl = url => {
   } catch (error) {
     console.error('Error extracting filename:', error)
     return null
+  }
+}
+
+const createWebpBlob = (canvas, quality) => {
+  return new Promise(resolve => canvas.toBlob(resolve, 'image/webp', quality))
+}
+
+const optimizeImage = async file => {
+  if (!file.type.startsWith('image/') || !('createImageBitmap' in window)) {
+    return file
+  }
+
+  let bitmap
+  try {
+    bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' })
+    const largestDimension = Math.max(bitmap.width, bitmap.height)
+    const scale = Math.min(1, MAX_IMAGE_DIMENSION / largestDimension)
+
+    if (
+      scale === 1 &&
+      file.size <= TARGET_IMAGE_SIZE &&
+      ['image/jpeg', 'image/webp'].includes(file.type)
+    ) {
+      return file
+    }
+
+    const canvas = document.createElement('canvas')
+    canvas.width = Math.round(bitmap.width * scale)
+    canvas.height = Math.round(bitmap.height * scale)
+    canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height)
+
+    let quality = 0.84
+    let blob = await createWebpBlob(canvas, quality)
+    while (blob && blob.size > TARGET_IMAGE_SIZE && quality > 0.68) {
+      quality -= 0.08
+      blob = await createWebpBlob(canvas, quality)
+    }
+
+    if (!blob || (scale === 1 && blob.size >= file.size)) {
+      return file
+    }
+
+    const filename = file.name.replace(/\.[^.]+$/, '')
+    return new File([blob], `${filename}.webp`, { type: 'image/webp' })
+  } catch (error) {
+    console.warn('Image optimization skipped:', error)
+    return file
+  } finally {
+    bitmap?.close()
   }
 }
 
@@ -380,17 +432,18 @@ const handleSaveItem = async itemData => {
   try {
     loading.value = true
     let mediaUrl = itemData.url
-
-    if (
-      modalMode.value === 'edit' &&
-      itemData.file &&
-      editingItem.value.media_url
-    ) {
-      await deleteMediaFromStorage(editingItem.value.media_url)
-    }
+    const previousMediaUrl =
+      modalMode.value === 'edit' && itemData.file ? editingItem.value.media_url : null
 
     if (itemData.file) {
-      mediaUrl = await uploadMedia(itemData.file)
+      let fileToUpload = itemData.file
+      if (itemData.type === 'image') {
+        savingMessage.value = 'Optimizing image...'
+        fileToUpload = await optimizeImage(itemData.file)
+      }
+
+      savingMessage.value = 'Uploading media...'
+      mediaUrl = await uploadMedia(fileToUpload)
     }
 
     if (modalMode.value === 'add') {
@@ -433,6 +486,10 @@ const handleSaveItem = async itemData => {
       featuredItems.value = featuredItems.value.map(item =>
         item.id === editingItem.value.id ? data : item,
       )
+
+      if (previousMediaUrl) {
+        await deleteMediaFromStorage(previousMediaUrl)
+      }
     }
 
     showModal.value = false
@@ -442,6 +499,7 @@ const handleSaveItem = async itemData => {
   } finally {
     fetchItems()
     loading.value = false
+    savingMessage.value = ''
   }
 }
 
@@ -520,6 +578,7 @@ onMounted(fetchItems)
       :mode="modalMode"
       :item="editingItem"
       :saving="loading"
+      :savingMessage="savingMessage"
       @close="showModal = false"
       @save="handleSaveItem"
     />
