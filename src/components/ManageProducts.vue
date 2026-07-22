@@ -277,7 +277,7 @@ onMounted(() => {
           <p class="metric-value">{{ totalProducts }}</p>
         </div>
         <div class="metric-card">
-          <h3>Total Inventory Value</h3>
+          <h3>Catalog Price Total</h3>
           <p class="metric-value">${{ totalValue.toLocaleString() }}</p>
         </div>
         <div class="metric-card">
