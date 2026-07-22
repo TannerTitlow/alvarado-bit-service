@@ -3,7 +3,7 @@ import { ref, computed, onMounted } from 'vue'
 import { supabase } from '@/lib/supabaseClient'
 import FeaturedItem from './FeaturedItem.vue'
 import FeaturedModal from './FeaturedModal.vue'
-import ConfirmModal from './ConfirmModal.vue'
+import ConfirmModal from '@/components/ConfirmModal.vue'
 
 const featuredItems = ref([])
 const loading = ref(false)
@@ -433,7 +433,9 @@ const handleSaveItem = async itemData => {
     loading.value = true
     let mediaUrl = itemData.url
     const previousMediaUrl =
-      modalMode.value === 'edit' && itemData.file ? editingItem.value.media_url : null
+      modalMode.value === 'edit' && itemData.file
+        ? editingItem.value.media_url
+        : null
 
     if (itemData.file) {
       let fileToUpload = itemData.file
@@ -634,7 +636,10 @@ onMounted(fetchItems)
   border-radius: 0.6rem;
   cursor: pointer;
   font-weight: 500;
-  transition: filter 180ms ease, box-shadow 220ms ease, transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    filter 180ms ease,
+    box-shadow 220ms ease,
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .add-item-btn:hover {

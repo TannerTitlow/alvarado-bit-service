@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">Alvarado Bit Service test fixture</title>
+  <desc id="desc">A stylized drill bit and field horizon for local development.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" x2="1" y1="0" y2="1">
+      <stop stop-color="#15283b" />
+      <stop offset="1" stop-color="#d46c33" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="675" fill="url(#sky)" />
+  <path d="M0 470 240 385l190 70 210-135 225 120 335-95v330H0Z" fill="#17271f" />
+  <circle cx="600" cy="330" r="135" fill="#d99645" />
+  <circle cx="600" cy="330" r="94" fill="#263238" />
+  <path d="m600 215 38 93 100 8-76 66 23 98-85-51-85 51 23-98-76-66 100-8Z" fill="#f3d494" />
+  <text x="600" y="585" fill="#f8f1e7" font-family="Arial, sans-serif" font-size="42" font-weight="700" text-anchor="middle">LOCAL TEST FIXTURE</text>
+</svg>

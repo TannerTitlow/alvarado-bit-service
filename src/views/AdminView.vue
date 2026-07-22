@@ -3,9 +3,9 @@ import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabaseClient'
 import { SITE_URL } from '@/lib/seo'
-import ContactSubmissions from '@/components/ContactSubmissions.vue'
-import ManageDrillBitInventory from '@/components/ManageDrillBitInventory.vue'
-import ManageFeatured from '@/components/ManageFeatured.vue'
+import ContactSubmissions from '@/components/admin/contact-submissions/ContactSubmissions.vue'
+import ManageDrillBitInventory from '@/components/admin/inventory/ManageDrillBitInventory.vue'
+import ManageFeatured from '@/components/admin/featured/ManageFeatured.vue'
 
 const ADMIN_SUBDOMAIN_HOST = 'admin.alvaradobitservice.com'
 
@@ -55,7 +55,7 @@ const toggleSidenav = () => {
 }
 
 // Close sidenav when changing sections (mobile)
-const handleSectionChange = (section) => {
+const handleSectionChange = section => {
   currentSection.value = section
   isSidenavOpen.value = false
 }
@@ -87,9 +87,11 @@ onMounted(() => {
       </button>
       <h1 class="mobile-title">
         {{
-           currentSection === 'submissions' ? 'Contact Submissions' :
-            currentSection === 'inventory' ? 'Drill Bit Inventory' :
-           'Featured Content'
+          currentSection === 'submissions'
+            ? 'Contact Submissions'
+            : currentSection === 'inventory'
+              ? 'Drill Bit Inventory'
+              : 'Featured Content'
         }}
       </h1>
     </header>
@@ -223,9 +225,11 @@ onMounted(() => {
       <header class="content-header desktop-only">
         <h1>
           {{
-             currentSection === 'submissions' ? 'Contact Submissions' :
-             currentSection === 'inventory' ? 'Drill Bit Inventory' :
-             'Featured Content'
+            currentSection === 'submissions'
+              ? 'Contact Submissions'
+              : currentSection === 'inventory'
+                ? 'Drill Bit Inventory'
+                : 'Featured Content'
           }}
         </h1>
       </header>
@@ -238,12 +242,8 @@ onMounted(() => {
           :loading="loading"
           @refresh-data="fetchSubmissions"
         />
-        <ManageDrillBitInventory
-          v-if="currentSection === 'inventory'"
-        />
-        <ManageFeatured
-          v-if="currentSection === 'featured'"
-        />
+        <ManageDrillBitInventory v-if="currentSection === 'inventory'" />
+        <ManageFeatured v-if="currentSection === 'featured'" />
       </div>
     </div>
   </main>
@@ -363,7 +363,10 @@ onMounted(() => {
   border: none;
   border-radius: 0.65rem;
   cursor: pointer;
-  transition: background-color 180ms ease, color 180ms ease, transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    background-color 180ms ease,
+    color 180ms ease,
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
   font-size: 0.95rem;
   font-weight: 600;
   text-align: left;
@@ -412,7 +415,11 @@ onMounted(() => {
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 0.65rem;
   cursor: pointer;
-  transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease, transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    background-color 180ms ease,
+    color 180ms ease,
+    border-color 180ms ease,
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
   font-size: 1rem;
   text-decoration: none;
 }
@@ -434,7 +441,11 @@ onMounted(() => {
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 0.65rem;
   cursor: pointer;
-  transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease, transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    background-color 180ms ease,
+    color 180ms ease,
+    border-color 180ms ease,
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
   font-size: 1rem;
   font-family: var(--font-primary);
 }

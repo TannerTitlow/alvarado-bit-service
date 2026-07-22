@@ -59,6 +59,39 @@ VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
 npm run dev
 ```
 
+## Local Supabase
+
+The `supabase/` directory tracks the current database and Storage configuration. The baseline migrations represent the hosted project as of July 22, 2026; they do not contain production rows or uploaded files.
+
+1. Start the local Supabase stack (Docker must be running):
+
+```bash
+npm run supabase:start
+```
+
+2. Copy the local API URL and anon key printed by the command into `.env.local`:
+
+```bash
+VITE_SUPABASE_URL=http://127.0.0.1:54321
+VITE_SUPABASE_ANON_KEY=your-local-anon-key
+```
+
+3. Run the app with `npm run dev`. Stop the local stack with `npm run supabase:stop`.
+
+### Database workflow
+
+Create every database or Storage policy change as a migration, then test it locally before deploying:
+
+```bash
+npx supabase migration new describe_change
+npm run supabase:reset
+npm run supabase:push
+```
+
+`supabase:push` applies only migrations that are not recorded in the linked hosted project. Check alignment with `npm run supabase:migrations` before a deploy. Avoid running schema changes directly in the Supabase SQL editor; if an emergency manual change is necessary, create and mark an equivalent migration before the next deploy.
+
+`supabase/seed.sql` supplies local-only test records and runs automatically with `npm run supabase:reset`. Storage bucket configuration is in `supabase/config.toml`; the only tracked Storage object is a small featured-content fixture. Production uploads are not synchronized.
+
 ## 🏗️ Project Structure
 
 ```

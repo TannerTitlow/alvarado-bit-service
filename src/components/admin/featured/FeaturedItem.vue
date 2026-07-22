@@ -137,144 +137,144 @@ const moveDown = () => {
   >
     <div class="featured-item">
       <div class="item-content">
-      <!-- Desktop Drag Handle -->
-      <div
-        class="drag-handle desktop-only"
-        draggable="true"
-        @dragstart="handleDragStart"
-        @dragend="handleDragEnd"
-        @mousedown="handleDragHandleMouseDown"
-        @mouseup="handleDragHandleMouseUp"
-        @mouseleave="handleDragHandleMouseUp"
-        title="Drag to reorder"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="handle-icon"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-        >
-          <circle cx="12" cy="7" r="1" fill="currentColor" />
-          <circle cx="12" cy="12" r="1" fill="currentColor" />
-          <circle cx="12" cy="17" r="1" fill="currentColor" />
-          <circle cx="7" cy="7" r="1" fill="currentColor" />
-          <circle cx="7" cy="12" r="1" fill="currentColor" />
-          <circle cx="7" cy="17" r="1" fill="currentColor" />
-          <circle cx="17" cy="7" r="1" fill="currentColor" />
-          <circle cx="17" cy="12" r="1" fill="currentColor" />
-          <circle cx="17" cy="17" r="1" fill="currentColor" />
-        </svg>
-      </div>
-
-      <!-- Mobile Reorder Controls -->
-      <div class="mobile-reorder mobile-only">
-        <button
-          class="reorder-btn up"
-          @click="moveUp"
-          :disabled="isFirst"
-          title="Move up"
+        <!-- Desktop Drag Handle -->
+        <div
+          class="drag-handle desktop-only"
+          draggable="true"
+          @dragstart="handleDragStart"
+          @dragend="handleDragEnd"
+          @mousedown="handleDragHandleMouseDown"
+          @mouseup="handleDragHandleMouseUp"
+          @mouseleave="handleDragHandleMouseUp"
+          title="Drag to reorder"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="reorder-icon"
+            class="handle-icon"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M5 15l7-7 7 7"
-            />
+            <circle cx="12" cy="7" r="1" fill="currentColor" />
+            <circle cx="12" cy="12" r="1" fill="currentColor" />
+            <circle cx="12" cy="17" r="1" fill="currentColor" />
+            <circle cx="7" cy="7" r="1" fill="currentColor" />
+            <circle cx="7" cy="12" r="1" fill="currentColor" />
+            <circle cx="7" cy="17" r="1" fill="currentColor" />
+            <circle cx="17" cy="7" r="1" fill="currentColor" />
+            <circle cx="17" cy="12" r="1" fill="currentColor" />
+            <circle cx="17" cy="17" r="1" fill="currentColor" />
           </svg>
-        </button>
-        <button
-          class="reorder-btn down"
-          @click="moveDown"
-          :disabled="isLast"
-          title="Move down"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="reorder-icon"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
+        </div>
+
+        <!-- Mobile Reorder Controls -->
+        <div class="mobile-reorder mobile-only">
+          <button
+            class="reorder-btn up"
+            @click="moveUp"
+            :disabled="isFirst"
+            title="Move up"
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M19 9l-7 7-7-7"
-            />
-          </svg>
-        </button>
-      </div>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="reorder-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M5 15l7-7 7 7"
+              />
+            </svg>
+          </button>
+          <button
+            class="reorder-btn down"
+            @click="moveDown"
+            :disabled="isLast"
+            title="Move down"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="reorder-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </button>
+        </div>
 
-      <!-- Media Container -->
-      <div class="media-container">
-        <img
-          v-if="item.type === 'image'"
-          :src="item.media_url"
-          :alt="item.description"
-          class="media-preview"
-        />
-        <video
-          v-else
-          :src="item.media_url"
-          class="media-preview"
-          controls
-        ></video>
-      </div>
+        <!-- Media Container -->
+        <div class="media-container">
+          <img
+            v-if="item.type === 'image'"
+            :src="item.media_url"
+            :alt="item.description"
+            class="media-preview"
+          />
+          <video
+            v-else
+            :src="item.media_url"
+            class="media-preview"
+            controls
+          ></video>
+        </div>
 
-      <!-- Item Details -->
+        <!-- Item Details -->
         <div class="item-details">
-        <p class="item-description">{{ item.description }}</p>
+          <p class="item-description">{{ item.description }}</p>
           <div class="item-metadata">
             <span class="type-badge" :class="item.type">
               {{ item.type === 'image' ? 'Image' : 'Video' }}
             </span>
-          <span class="order-badge">Order: {{ item.order_index + 1 }}</span>
-        </div>
+            <span class="order-badge">Order: {{ item.order_index + 1 }}</span>
+          </div>
 
-        <div class="item-actions">
-          <button @click="$emit('edit', item)" class="edit-btn">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="action-icon"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-              />
-            </svg>
-            Edit
-          </button>
-          <button @click="$emit('delete', item.id)" class="delete-btn">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="action-icon"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-              />
-            </svg>
-            Delete
-          </button>
-        </div>
+          <div class="item-actions">
+            <button @click="$emit('edit', item)" class="edit-btn">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="action-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                />
+              </svg>
+              Edit
+            </button>
+            <button @click="$emit('delete', item.id)" class="delete-btn">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="action-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
+              </svg>
+              Delete
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -294,7 +294,10 @@ const moveDown = () => {
   overflow: hidden;
   box-shadow: 0 0.6rem 1.5rem rgba(25, 42, 78, 0.06);
   will-change: transform;
-  transition: border-color 220ms ease, box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1), transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    border-color 220ms ease,
+    box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
   position: relative;
   border: 1px solid #dce3ef;
 }
@@ -326,7 +329,10 @@ const moveDown = () => {
   z-index: 10;
   cursor: grab;
   box-shadow: 0 0.2rem 0.5rem rgba(10, 21, 48, 0.12);
-  transition: background-color 180ms ease, box-shadow 180ms ease, transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    background-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .drag-handle:hover {
@@ -381,6 +387,7 @@ const moveDown = () => {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
 }
 
 .item-metadata {
@@ -401,7 +408,10 @@ const moveDown = () => {
   font-size: 0.75rem;
   font-family: var(--font-secondary);
   font-weight: 600;
-  transition: background-color 180ms ease, box-shadow 180ms ease, transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    background-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .featured-item:hover .type-badge,
@@ -451,7 +461,10 @@ const moveDown = () => {
   cursor: pointer;
   font-family: var(--font-secondary);
   font-weight: 600;
-  transition: background-color 180ms ease, box-shadow 180ms ease, transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    background-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .edit-btn {
@@ -500,7 +513,10 @@ const moveDown = () => {
   align-items: center;
   justify-content: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-  transition: background-color 180ms ease, box-shadow 180ms ease, transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    background-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .reorder-btn:disabled {
