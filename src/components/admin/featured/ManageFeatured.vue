@@ -40,20 +40,23 @@ const fetchItems = async () => {
     // Get signed URLs for all media
     const itemsWithSignedUrls = await Promise.all(
       data.map(async item => {
-        if (item.media_url) {
-          const filename = getFilenameFromUrl(item.media_url)
-          const {
-            data: { signedUrl },
-          } = await supabase.storage
-            .from('featured-content')
-            .createSignedUrl(filename, 60 * 60)
+        const storagePath = getStoragePath(item.media_url)
+        if (!storagePath) return { ...item, media_url: null, storage_path: null }
 
-          return {
-            ...item,
-            media_url: signedUrl,
-          }
+        const { data: signedData, error: signedUrlError } = await supabase.storage
+          .from('featured-content')
+          .createSignedUrl(storagePath, 60 * 60)
+
+        if (signedUrlError) {
+          console.error('Error creating featured media URL:', signedUrlError)
+          return { ...item, media_url: null, storage_path: storagePath }
         }
-        return item
+
+        return {
+          ...item,
+          media_url: signedData.signedUrl,
+          storage_path: storagePath,
+        }
       }),
     )
 
@@ -73,16 +76,12 @@ const fetchItems = async () => {
   }
 }
 
-const getFilenameFromUrl = url => {
-  try {
-    let filename = url.split('/').pop()
-    filename = filename.split('?')[0]
-    filename = filename.split('#')[0]
-    return filename
-  } catch (error) {
-    console.error('Error extracting filename:', error)
-    return null
-  }
+const getStoragePath = url => {
+  if (!url) return null
+
+  const marker = '/featured-content/'
+  const path = url.includes(marker) ? url.split(marker)[1] : url
+  return path.split('?')[0].split('#')[0]
 }
 
 const createWebpBlob = (canvas, quality) => {
@@ -207,7 +206,7 @@ const handleDragEnd = async () => {
       id: item.id,
       type: item.type,
       description: item.description,
-      media_url: item.media_url,
+      media_url: item.storage_path ?? getStoragePath(item.media_url),
       order_index: index,
     }))
 
@@ -248,7 +247,7 @@ const handleMoveUp = async index => {
       id: item.id,
       type: item.type,
       description: item.description,
-      media_url: item.media_url,
+        media_url: item.storage_path ?? getStoragePath(item.media_url),
       order_index: item.order_index,
     }))
 
@@ -280,7 +279,7 @@ const handleMoveDown = async index => {
       id: item.id,
       type: item.type,
       description: item.description,
-      media_url: item.media_url,
+        media_url: item.storage_path ?? getStoragePath(item.media_url),
       order_index: item.order_index,
     }))
 
@@ -321,12 +320,12 @@ const deleteMediaFromStorage = async mediaUrl => {
   try {
     if (!mediaUrl) return
 
-    const filename = getFilenameFromUrl(mediaUrl)
-    if (!filename) return
+    const storagePath = getStoragePath(mediaUrl)
+    if (!storagePath) return
 
     const { error } = await supabase.storage
       .from('featured-content')
-      .remove([filename])
+      .remove([storagePath])
 
     if (error) throw error
   } catch (error) {
@@ -347,11 +346,7 @@ const uploadMedia = async file => {
 
     if (uploadError) throw uploadError
 
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from('featured-content').getPublicUrl(filePath)
-
-    return publicUrl
+    return filePath
   } catch (error) {
     console.error('Error uploading media:', error)
     throw error
@@ -407,7 +402,7 @@ const confirmDelete = async () => {
       id: item.id,
       type: item.type,
       description: item.description,
-      media_url: item.media_url,
+      media_url: item.storage_path ?? getStoragePath(item.media_url),
       order_index: index,
     }))
 
@@ -431,10 +426,10 @@ const confirmDelete = async () => {
 const handleSaveItem = async itemData => {
   try {
     loading.value = true
-    let mediaUrl = itemData.url
+    let mediaUrl = editingItem.value?.storage_path ?? null
     const previousMediaUrl =
       modalMode.value === 'edit' && itemData.file
-        ? editingItem.value.media_url
+        ? editingItem.value.storage_path
         : null
 
     if (itemData.file) {

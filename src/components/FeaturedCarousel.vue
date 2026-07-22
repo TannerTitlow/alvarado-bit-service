@@ -31,21 +31,27 @@ const shouldAutoplay = computed(() => {
 const currentItem = computed(() => items.value[currentIndex.value])
 
 const getStoragePath = mediaUrl => {
+  if (!mediaUrl) return null
+
   const marker = '/featured-content/'
-  return mediaUrl?.split(marker)[1]?.split('?')[0]
+  const path = mediaUrl.includes(marker) ? mediaUrl.split(marker)[1] : mediaUrl
+  return path.split('?')[0].split('#')[0]
 }
 
 const getSignedMediaUrl = async mediaUrl => {
   const path = getStoragePath(mediaUrl)
   if (!path) return mediaUrl
 
-  const {
-    data: { signedUrl },
-  } = await supabase.storage
+  const { data, error } = await supabase.storage
     .from('featured-content')
     .createSignedUrl(path, 60 * 60)
 
-  return signedUrl || mediaUrl
+  if (error) {
+    console.error('Error creating featured media URL:', error)
+    return null
+  }
+
+  return data.signedUrl
 }
 
 const fetchFeaturedItems = async () => {

@@ -68,7 +68,7 @@ ON CONFLICT (id) DO UPDATE SET
 INSERT INTO public.featured_items (id, type, media_url, description, order_index)
 VALUES
   ('20000000-0000-4000-8000-000000000001', 'image', 'field-operations.svg', 'Local fixture: PDC drilling operations', 0),
-  ('20000000-0000-4000-8000-000000000002', 'image', 'field-operations.svg', 'Local fixture: inventory ready for dispatch', 1)
+  ('20000000-0000-4000-8000-000000000002', 'image', 'field-inventory.svg', 'Local fixture: inventory ready for dispatch', 1)
 ON CONFLICT (id) DO UPDATE SET
   type = EXCLUDED.type,
   media_url = EXCLUDED.media_url,

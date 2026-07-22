@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">Alvarado Bit Service inventory test fixture</title>
+  <desc id="desc">A stylized inventory rack and drill bits for local development.</desc>
+  <rect width="1200" height="675" fill="#13243a" />
+  <path d="M130 130h940v405H130z" fill="#e6edf5" />
+  <path d="M195 175h810v54H195zm0 137h810v54H195zm0 137h810v54H195z" fill="#8da0b8" />
+  <g fill="#d46c33">
+    <path d="M285 170h72l22 60-58 40-58-40zM510 170h72l22 60-58 40-58-40zM735 170h72l22 60-58 40-58-40z" />
+    <path d="M285 307h72l22 60-58 40-58-40zM510 307h72l22 60-58 40-58-40zM735 307h72l22 60-58 40-58-40z" />
+  </g>
+  <text x="600" y="605" fill="#f8f1e7" font-family="Arial, sans-serif" font-size="42" font-weight="700" text-anchor="middle">LOCAL INVENTORY FIXTURE</text>
+</svg>
