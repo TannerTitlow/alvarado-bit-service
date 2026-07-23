@@ -148,7 +148,7 @@ const stockState = computed(() => {
     >
       <BaseButton
         :icon="SquarePen"
-        variant="primary"
+        variant="danger"
         size="sm"
         :elevated="false"
         @click="emit('edit', model)"
