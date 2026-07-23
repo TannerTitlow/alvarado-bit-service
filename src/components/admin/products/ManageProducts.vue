@@ -378,7 +378,10 @@ onMounted(() => {
   border-radius: 0.6rem;
   background: #fbfcff;
   font-size: 1rem;
-  transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background-color 180ms ease;
 }
 
 .filters {
@@ -394,7 +397,10 @@ onMounted(() => {
   background: #fbfcff;
   font-size: 1rem;
   min-width: 180px;
-  transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background-color 180ms ease;
 }
 
 .search-input:hover,
@@ -467,7 +473,10 @@ onMounted(() => {
   border-radius: 0.6rem;
   cursor: pointer;
   font-weight: 500;
-  transition: filter 180ms ease, box-shadow 220ms ease, transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    filter 180ms ease,
+    box-shadow 220ms ease,
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .add-product-btn:hover {

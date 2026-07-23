@@ -50,12 +50,24 @@ const modelSearchText = model =>
     @update:model-value="emit('update:modelValue', $event)"
   >
     <template #option="{ option, selected }">
-      <span class="flex flex-wrap items-center gap-[0.35rem] font-secondary font-bold text-brand-navy">
-        <span v-if="selected" class="rounded-full bg-admin-link px-[0.3rem] py-[0.11rem] text-[0.6rem] uppercase tracking-[0.03em] text-white">Selected</span>
+      <span
+        class="flex flex-wrap items-center gap-[0.35rem] font-secondary font-bold text-brand-navy"
+      >
+        <span
+          v-if="selected"
+          class="rounded-full bg-admin-link px-[0.3rem] py-[0.11rem] text-[0.6rem] uppercase tracking-[0.03em] text-white"
+          >Selected</span
+        >
         {{ option.display_name }}
-        <b v-if="option.circulation_type === 'reverse_circulation'" class="rounded-[0.25rem] bg-admin-danger-tag px-[0.32rem] py-[0.12rem] text-[0.64rem] text-admin-danger">RC</b>
+        <b
+          v-if="option.circulation_type === 'reverse_circulation'"
+          class="rounded-[0.25rem] bg-admin-danger-tag px-[0.32rem] py-[0.12rem] text-[0.64rem] text-admin-danger"
+          >RC</b
+        >
       </span>
-      <small class="text-[0.75rem] font-normal text-admin-muted">{{ modelDetails(option) }}</small>
+      <small class="text-[0.75rem] font-normal text-admin-muted">{{
+        modelDetails(option)
+      }}</small>
     </template>
   </BaseCombobox>
 </template>

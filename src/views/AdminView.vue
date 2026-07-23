@@ -1,7 +1,15 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { Boxes, House, Image, LayoutDashboard, LogOut, Mail, Menu } from '@lucide/vue'
+import {
+  Boxes,
+  House,
+  Image,
+  LayoutDashboard,
+  LogOut,
+  Mail,
+  Menu,
+} from '@lucide/vue'
 import { supabase } from '@/lib/supabaseClient'
 import { SITE_URL } from '@/lib/seo'
 import ContactSubmissions from '@/components/admin/contact-submissions/ContactSubmissions.vue'
@@ -85,7 +93,9 @@ onMounted(() => {
       >
         <Menu :size="24" aria-hidden="true" />
       </button>
-      <h1 class="ml-[0.85rem] text-[1.05rem] text-[var(--navy-blue)]">{{ currentTitle }}</h1>
+      <h1 class="ml-[0.85rem] text-[1.05rem] text-[var(--navy-blue)]">
+        {{ currentTitle }}
+      </h1>
     </header>
 
     <div
@@ -152,9 +162,15 @@ onMounted(() => {
       </div>
     </aside>
 
-    <div class="ml-[17.5rem] flex min-h-screen flex-1 flex-col max-[960px]:ml-0 max-[960px]:pt-[4.5rem]">
-      <header class="border-b border-admin-border bg-white/[0.94] px-[clamp(1.25rem,3vw,2.5rem)] py-6 max-[960px]:hidden">
-        <h1 class="text-[clamp(1.35rem,2vw,1.75rem)] font-bold text-[var(--navy-blue)]">
+    <div
+      class="ml-[17.5rem] flex min-h-screen flex-1 flex-col max-[960px]:ml-0 max-[960px]:pt-[4.5rem]"
+    >
+      <header
+        class="border-b border-admin-border bg-white/[0.94] px-[clamp(1.25rem,3vw,2.5rem)] py-6 max-[960px]:hidden"
+      >
+        <h1
+          class="text-[clamp(1.35rem,2vw,1.75rem)] font-bold text-[var(--navy-blue)]"
+        >
           {{ currentTitle }}
         </h1>
       </header>

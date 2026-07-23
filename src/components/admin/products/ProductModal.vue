@@ -6,12 +6,12 @@ import 'vue-advanced-cropper/dist/style.css'
 const props = defineProps({
   mode: {
     type: String,
-    required: true
+    required: true,
   },
   product: {
     type: Object,
-    default: null
-  }
+    default: null,
+  },
 })
 
 const emit = defineEmits(['close', 'save'])
@@ -22,7 +22,7 @@ const formData = ref({
   price: '',
   category: '',
   image_url: '',
-  image: null
+  image: null,
 })
 
 const imagePreview = ref(null)
@@ -35,7 +35,7 @@ onMounted(() => {
   if (props.product) {
     formData.value = {
       ...props.product,
-      image_url: props.product.image_url
+      image_url: props.product.image_url,
     }
     imagePreview.value = props.product.image_url
     if (props.product.image_url) {
@@ -57,7 +57,7 @@ const handleClose = () => {
   }, 150)
 }
 
-const handleImageChange = (event) => {
+const handleImageChange = event => {
   const file = event.target.files[0]
   if (file) {
     originalImage.value = file
@@ -75,20 +75,25 @@ const cropImage = () => {
 
   const { coordinates, canvas } = cropperRef.value.getResult()
 
-  canvas.toBlob((blob) => {
-    const filename = originalImage.value instanceof File
-      ? originalImage.value.name
-      : 'cropped-image.jpg'
+  canvas.toBlob(
+    blob => {
+      const filename =
+        originalImage.value instanceof File
+          ? originalImage.value.name
+          : 'cropped-image.jpg'
 
-    const croppedFile = new File([blob], filename, {
-      type: 'image/jpeg',
-      lastModified: new Date().getTime()
-    })
+      const croppedFile = new File([blob], filename, {
+        type: 'image/jpeg',
+        lastModified: new Date().getTime(),
+      })
 
-    formData.value.image = croppedFile
-    imagePreview.value = URL.createObjectURL(croppedFile)
-    showCropper.value = false
-  }, 'image/jpeg', 0.9)
+      formData.value.image = croppedFile
+      imagePreview.value = URL.createObjectURL(croppedFile)
+      showCropper.value = false
+    },
+    'image/jpeg',
+    0.9,
+  )
 }
 
 const toggleCropper = () => {
@@ -102,24 +107,44 @@ const cancelCrop = () => {
 }
 
 const handleSubmit = () => {
-  if (!formData.value.title || !formData.value.description || !formData.value.price) {
+  if (
+    !formData.value.title ||
+    !formData.value.description ||
+    !formData.value.price
+  ) {
     alert('Please fill in all required fields')
     return
   }
 
   emit('save', {
     ...formData.value,
-    price: Number(formData.value.price)
+    price: Number(formData.value.price),
   })
 }
 </script>
 
 <template>
-  <div class="modal-backdrop" :class="{ 'modal-closing': isClosing }" @click="handleClose">
-    <div class="modal-content" :class="{ 'modal-closing': isClosing }" @click.stop>
+  <div
+    class="modal-backdrop"
+    :class="{ 'modal-closing': isClosing }"
+    @click="handleClose"
+  >
+    <div
+      class="modal-content"
+      :class="{ 'modal-closing': isClosing }"
+      @click.stop
+    >
       <div class="modal-header">
-        <h2 class="modal-title">{{ mode === 'add' ? 'Add New Product' : 'Edit Product' }}</h2>
-        <button class="close-button" @click="handleClose" aria-label="Close modal">×</button>
+        <h2 class="modal-title">
+          {{ mode === 'add' ? 'Add New Product' : 'Edit Product' }}
+        </h2>
+        <button
+          class="close-button"
+          @click="handleClose"
+          aria-label="Close modal"
+        >
+          ×
+        </button>
       </div>
 
       <form @submit.prevent="handleSubmit" class="product-form">
@@ -135,7 +160,7 @@ const handleSubmit = () => {
                 v-model="formData.title"
                 required
                 placeholder="Enter product title"
-              >
+              />
             </div>
 
             <div class="form-group">
@@ -162,7 +187,7 @@ const handleSubmit = () => {
                     step="0.01"
                     min="0"
                     placeholder="0.00"
-                  >
+                  />
                 </div>
               </div>
 
@@ -192,33 +217,36 @@ const handleSubmit = () => {
                   accept="image/*"
                   @change="handleImageChange"
                   class="hidden-file-input"
-                >
+                />
               </div>
 
               <!-- Image Preview -->
-              <div v-if="imagePreview && !showCropper" class="preview-container">
-                <img
-                  :src="imagePreview"
-                  alt="Preview"
-                  class="image-preview"
+              <div
+                v-if="imagePreview && !showCropper"
+                class="preview-container"
+              >
+                <img :src="imagePreview" alt="Preview" class="image-preview" />
+                <button
+                  type="button"
+                  @click="toggleCropper"
+                  class="edit-image-btn"
                 >
-                <button type="button" @click="toggleCropper" class="edit-image-btn">
                   Edit Image
                 </button>
               </div>
 
               <!-- Image Cropper -->
               <div v-if="showCropper" class="cropper-wrapper">
-                <Cropper
-                  ref="cropperRef"
-                  class="cropper"
-                  :src="imagePreview"
-                />
+                <Cropper ref="cropperRef" class="cropper" :src="imagePreview" />
                 <div class="cropper-actions">
                   <button type="button" @click="cropImage" class="crop-btn">
                     Apply Crop
                   </button>
-                  <button type="button" @click="cancelCrop" class="secondary-btn">
+                  <button
+                    type="button"
+                    @click="cancelCrop"
+                    class="secondary-btn"
+                  >
                     Cancel
                   </button>
                 </div>
@@ -293,7 +321,11 @@ const handleSubmit = () => {
   background: #f7f9fd;
   cursor: pointer;
   color: #666;
-  transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease, transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    background-color 180ms ease,
+    color 180ms ease,
+    border-color 180ms ease,
+    transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .close-button:hover {
@@ -344,17 +376,24 @@ const handleSubmit = () => {
   text-transform: uppercase;
 }
 
-input, select, textarea {
+input,
+select,
+textarea {
   width: 100%;
   min-height: 2.75rem;
   padding: 0.65rem 0.75rem;
   border: 1px solid #ccd7ea;
   border-radius: 0.6rem;
   background: #fbfcff;
-  transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background-color 180ms ease;
 }
 
-input:focus, select:focus, textarea:focus {
+input:focus,
+select:focus,
+textarea:focus {
   border-color: #8fa7d1;
   background: white;
   box-shadow: 0 0 0 0.2rem rgba(27, 43, 82, 0.1);
@@ -389,7 +428,11 @@ input:focus, select:focus, textarea:focus {
   font-family: var(--font-secondary);
   font-weight: 700;
   cursor: pointer;
-  transition: background-color 180ms ease, box-shadow 180ms ease, filter 180ms ease, transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    background-color 180ms ease,
+    box-shadow 180ms ease,
+    filter 180ms ease,
+    transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .file-input-label:hover {
@@ -451,14 +494,19 @@ input:focus, select:focus, textarea:focus {
   background: #f8faff;
 }
 
-.secondary-btn, .crop-btn, .save-btn {
+.secondary-btn,
+.crop-btn,
+.save-btn {
   min-width: 6.5rem;
   padding: 0.7rem 1.1rem;
   border-radius: 0.6rem;
   font-family: var(--font-secondary);
   font-weight: 700;
   cursor: pointer;
-  transition: background-color 180ms ease, box-shadow 180ms ease, transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    background-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .secondary-btn {
@@ -466,7 +514,8 @@ input:focus, select:focus, textarea:focus {
   border: 1px solid #ccd7ea;
 }
 
-.crop-btn, .save-btn {
+.crop-btn,
+.save-btn {
   background: linear-gradient(135deg, #c02a3d, #9f1f31);
   color: white;
   border: none;
@@ -483,7 +532,10 @@ input:focus, select:focus, textarea:focus {
   color: var(--navy-blue);
   font-weight: 700;
   cursor: pointer;
-  transition: background-color 180ms ease, box-shadow 180ms ease, transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    background-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .secondary-btn:hover,

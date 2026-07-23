@@ -2,8 +2,8 @@
 const props = defineProps({
   product: {
     type: Object,
-    required: true
-  }
+    required: true,
+  },
 })
 
 const emit = defineEmits(['edit', 'delete'])
@@ -16,10 +16,18 @@ const emit = defineEmits(['edit', 'delete'])
       :src="product.image_url"
       :alt="product.title"
       class="product-image"
+    />
+    <div
+      v-else
+      class="product-image product-image-placeholder"
+      role="img"
+      :aria-label="`${product.title} has no image`"
     >
-    <div v-else class="product-image product-image-placeholder" role="img" :aria-label="`${product.title} has no image`">
       <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M4 5.75A1.75 1.75 0 0 1 5.75 4h12.5A1.75 1.75 0 0 1 20 5.75v12.5A1.75 1.75 0 0 1 18.25 20H5.75A1.75 1.75 0 0 1 4 18.25V5.75Zm2 10.5 3.1-3.1a1 1 0 0 1 1.4 0l2.1 2.1 1.6-1.6a1 1 0 0 1 1.4 0l2.4 2.6V18H6v-1.75ZM9 8a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z" fill="currentColor" />
+        <path
+          d="M4 5.75A1.75 1.75 0 0 1 5.75 4h12.5A1.75 1.75 0 0 1 20 5.75v12.5A1.75 1.75 0 0 1 18.25 20H5.75A1.75 1.75 0 0 1 4 18.25V5.75Zm2 10.5 3.1-3.1a1 1 0 0 1 1.4 0l2.1 2.1 1.6-1.6a1 1 0 0 1 1.4 0l2.4 2.6V18H6v-1.75ZM9 8a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z"
+          fill="currentColor"
+        />
       </svg>
       <span>No image uploaded</span>
     </div>
@@ -28,9 +36,7 @@ const emit = defineEmits(['edit', 'delete'])
       <p class="product-description">{{ product.description }}</p>
       <p class="product-price">${{ product.price.toLocaleString() }}</p>
       <div class="product-actions">
-        <button @click="emit('edit', product)" class="edit-btn">
-          Edit
-        </button>
+        <button @click="emit('edit', product)" class="edit-btn">Edit</button>
         <button @click="emit('delete', product.id)" class="delete-btn">
           Delete
         </button>
@@ -46,7 +52,9 @@ const emit = defineEmits(['edit', 'delete'])
   border-radius: 0.85rem;
   overflow: hidden;
   box-shadow: 0 0.6rem 1.5rem rgba(25, 42, 78, 0.06);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .product-item:hover {
@@ -116,7 +124,10 @@ const emit = defineEmits(['edit', 'delete'])
   cursor: pointer;
   font-family: var(--font-secondary);
   font-weight: 600;
-  transition: background-color 180ms ease, box-shadow 180ms ease, transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    background-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .edit-btn {

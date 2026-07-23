@@ -7,8 +7,16 @@ import DashboardLeadQueue from './DashboardLeadQueue.vue'
 import DashboardInventoryAlerts from './DashboardInventoryAlerts.vue'
 
 const emit = defineEmits(['navigate'])
-const { submissions, loading, errorMessage, updatingId, attentionUnits, lowStockModels, metrics, startLead } =
-  useDashboard()
+const {
+  submissions,
+  loading,
+  errorMessage,
+  updatingId,
+  attentionUnits,
+  lowStockModels,
+  metrics,
+  startLead,
+} = useDashboard()
 
 const metricCards = computed(() => [
   {
