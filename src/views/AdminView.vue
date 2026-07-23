@@ -1,12 +1,13 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { Boxes, House, Image, LogOut, Mail, Menu } from '@lucide/vue'
+import { Boxes, House, Image, LayoutDashboard, LogOut, Mail, Menu } from '@lucide/vue'
 import { supabase } from '@/lib/supabaseClient'
 import { SITE_URL } from '@/lib/seo'
 import ContactSubmissions from '@/components/admin/contact-submissions/ContactSubmissions.vue'
 import ManageDrillBitInventory from '@/components/admin/inventory/ManageDrillBitInventory.vue'
 import ManageFeatured from '@/components/admin/featured/ManageFeatured.vue'
+import AdminDashboard from '@/components/admin/dashboard/AdminDashboard.vue'
 import AdminNavItem from '@/components/ui/AdminNavItem.vue'
 
 const ADMIN_SUBDOMAIN_HOST = 'admin.alvaradobitservice.com'
@@ -15,7 +16,7 @@ const router = useRouter()
 const submissions = ref([])
 const loading = ref(true)
 const error = ref(null)
-const currentSection = ref('submissions')
+const currentSection = ref('dashboard')
 const isSidenavOpen = ref(false)
 const publicSiteHref = computed(() => {
   if (typeof window === 'undefined') return SITE_URL
@@ -24,6 +25,7 @@ const publicSiteHref = computed(() => {
 })
 
 const currentTitle = computed(() => {
+  if (currentSection.value === 'dashboard') return 'Dashboard'
   if (currentSection.value === 'submissions') return 'Contact Submissions'
   if (currentSection.value === 'inventory') return 'Drill Bit Inventory'
   return 'Featured Content'
@@ -60,6 +62,7 @@ const toggleSidenav = () => {
 const handleSectionChange = section => {
   currentSection.value = section
   isSidenavOpen.value = false
+  if (section === 'submissions') fetchSubmissions()
 }
 
 onMounted(() => {
@@ -108,6 +111,13 @@ onMounted(() => {
 
       <nav class="flex-1 px-[0.9rem] py-6">
         <AdminNavItem
+          :active="currentSection === 'dashboard'"
+          :icon="LayoutDashboard"
+          @click="handleSectionChange('dashboard')"
+        >
+          Dashboard
+        </AdminNavItem>
+        <AdminNavItem
           :active="currentSection === 'submissions'"
           :icon="Mail"
           @click="handleSectionChange('submissions')"
@@ -150,6 +160,11 @@ onMounted(() => {
       </header>
 
       <div class="flex-1 bg-[#f3f6fb]">
+        <AdminDashboard
+          v-if="currentSection === 'dashboard'"
+          @navigate="handleSectionChange"
+          @refresh-submissions="fetchSubmissions"
+        />
         <ContactSubmissions
           v-if="currentSection === 'submissions'"
           :submissions="submissions"
