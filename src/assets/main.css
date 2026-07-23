@@ -1,58 +1,71 @@
 @import './fonts.css';
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-body {
-  min-height: 100vh;
-  color: #2c3e50;
-  background: #ffffff;
-  font-family: var(--font-primary);
-  font-weight: var(--fw-regular);
-  line-height: var(--leading-normal);
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+@layer base {
+  /* Preserve the existing site defaults on top of Tailwind Preflight. */
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 
-#app {
-  width: 100%;
-  margin: 0;
-  padding: 0;
-}
+  body {
+    min-height: 100vh;
+    color: #2c3e50;
+    background: #ffffff;
+    font-family: var(--font-primary);
+    font-weight: var(--fw-regular);
+    line-height: var(--leading-normal);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 
-:focus-visible {
-  outline: 3px solid var(--patriot-red);
-  outline-offset: 3px;
-}
+  #app {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
 
-/* Common text styles */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: var(--font-primary);
-  font-weight: var(--fw-bold);
-  line-height: var(--leading-tight);
-}
+  :focus-visible {
+    outline: 3px solid var(--patriot-red);
+    outline-offset: 3px;
+  }
 
-p {
-  font-family: var(--font-secondary);
-  font-weight: var(--fw-regular);
-  line-height: var(--leading-relaxed);
-}
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-primary);
+    font-weight: var(--fw-bold);
+    line-height: var(--leading-tight);
+  }
 
-/* Global Variables */
-:root {
-  --navy-blue: #1b2b52;
-  --patriot-red: #b22234;
-  --steel-gray: #707070;
-  --pure-white: #ffffff;
+  /* Preflight removes browser heading sizes; retain the prior visual scale. */
+  h1 { font-size: 2em; }
+  h2 { font-size: 1.5em; }
+  h3 { font-size: 1.17em; }
+  h4 { font-size: 1em; }
+  h5 { font-size: 0.83em; }
+  h6 { font-size: 0.67em; }
+
+  p {
+    font-family: var(--font-secondary);
+    font-weight: var(--fw-regular);
+    line-height: var(--leading-relaxed);
+  }
+
+  :root {
+    --navy-blue: #1b2b52;
+    --patriot-red: #b22234;
+    --steel-gray: #707070;
+    --pure-white: #ffffff;
+  }
 }

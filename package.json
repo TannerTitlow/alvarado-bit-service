@@ -18,6 +18,7 @@
     "supabase:push": "supabase db push"
   },
   "dependencies": {
+    "@lucide/vue": "^1.25.0",
     "@supabase/supabase-js": "^2.46.1",
     "@vueuse/core": "^12.0.0",
     "cropperjs": "^1.6.2",

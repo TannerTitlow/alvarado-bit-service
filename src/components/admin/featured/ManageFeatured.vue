@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabaseClient'
 import FeaturedItem from './FeaturedItem.vue'
 import FeaturedModal from './FeaturedModal.vue'
 import ConfirmModal from '@/components/ConfirmModal.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
 
 const featuredItems = ref([])
 const loading = ref(false)
@@ -41,11 +42,13 @@ const fetchItems = async () => {
     const itemsWithSignedUrls = await Promise.all(
       data.map(async item => {
         const storagePath = getStoragePath(item.media_url)
-        if (!storagePath) return { ...item, media_url: null, storage_path: null }
+        if (!storagePath)
+          return { ...item, media_url: null, storage_path: null }
 
-        const { data: signedData, error: signedUrlError } = await supabase.storage
-          .from('featured-content')
-          .createSignedUrl(storagePath, 60 * 60)
+        const { data: signedData, error: signedUrlError } =
+          await supabase.storage
+            .from('featured-content')
+            .createSignedUrl(storagePath, 60 * 60)
 
         if (signedUrlError) {
           console.error('Error creating featured media URL:', signedUrlError)
@@ -247,7 +250,7 @@ const handleMoveUp = async index => {
       id: item.id,
       type: item.type,
       description: item.description,
-        media_url: item.storage_path ?? getStoragePath(item.media_url),
+      media_url: item.storage_path ?? getStoragePath(item.media_url),
       order_index: item.order_index,
     }))
 
@@ -279,7 +282,7 @@ const handleMoveDown = async index => {
       id: item.id,
       type: item.type,
       description: item.description,
-        media_url: item.storage_path ?? getStoragePath(item.media_url),
+      media_url: item.storage_path ?? getStoragePath(item.media_url),
       order_index: item.order_index,
     }))
 
@@ -504,24 +507,38 @@ onMounted(fetchItems)
 </script>
 
 <template>
-  <div class="manage-featured">
-    <div class="header-section">
-      <div class="title-area">
-        <h2>Featured Carousel Items</h2>
-        <button @click="handleAddItem" class="add-item-btn">
-          Add New Item
-        </button>
+  <div class="p-4 min-[961px]:p-[clamp(1rem,2.5vw,2rem)]">
+    <div
+      class="mb-5 rounded-2xl border border-admin-border bg-admin-panel p-4 shadow-panel min-[961px]:p-[clamp(1rem,2.5vw,1.75rem)]"
+    >
+      <div
+        class="mb-4 flex items-center justify-between max-[960px]:flex-col max-[960px]:items-stretch max-[960px]:gap-4"
+      >
+        <h2
+          class="text-[clamp(1.35rem,2vw,1.75rem)] font-bold text-brand-navy max-[960px]:text-2xl"
+        >
+          Featured Carousel Items
+        </h2>
+        <BaseButton
+          variant="danger"
+          @click="handleAddItem"
+          class="max-[960px]:w-full"
+          >Add New Item</BaseButton
+        >
       </div>
 
-      <p class="help-text">
+      <p class="text-[0.9rem] leading-[1.55] text-admin-subtle">
         Drag items by their handle to rearrange the order in the carousel.
         Changes will be reflected on the home page immediately.
       </p>
     </div>
 
     <!-- Loading State -->
-    <div v-if="loading" class="loading-state">
-      <svg class="spinner" viewBox="0 0 50 50">
+    <div
+      v-if="loading"
+      class="flex animate-pulse flex-col items-center gap-4 rounded-panel border border-dashed border-[#c5d1e5] bg-admin-panel p-8 text-center text-admin-subtle shadow-toolbar"
+    >
+      <svg class="h-[50px] w-[50px] animate-spin" viewBox="0 0 50 50">
         <circle
           cx="25"
           cy="25"
@@ -536,16 +553,23 @@ onMounted(fetchItems)
     </div>
 
     <!-- Empty State -->
-    <div v-else-if="featuredItems.length === 0" class="empty-state">
+    <div
+      v-else-if="featuredItems.length === 0"
+      class="flex flex-col items-center gap-4 rounded-panel border border-dashed border-[#c5d1e5] bg-admin-panel px-8 py-12 text-center text-admin-subtle shadow-toolbar"
+    >
       <p>No featured items found. Click "Add New Item" to get started.</p>
     </div>
 
     <!-- Items Grid -->
     <TransitionGroup
-      name="grid"
       tag="div"
-      class="featured-grid"
+      class="relative grid min-h-[200px] grid-cols-[repeat(auto-fill,minmax(17rem,1fr))] gap-4 max-[960px]:grid-cols-2 max-[960px]:p-3 max-sm:grid-cols-1 max-sm:p-0"
       :duration="{ move: 400 }"
+      move-class="transition-transform duration-300 ease-emphasized"
+      enter-active-class="transition-[opacity,transform,width] duration-300 ease-emphasized"
+      leave-active-class="absolute w-[calc(100%-1.5rem)] transition-[opacity,transform,width] duration-300 ease-emphasized max-[960px]:w-[calc(100%-1rem)]"
+      enter-from-class="scale-95 opacity-0"
+      leave-to-class="scale-95 opacity-0"
     >
       <FeaturedItem
         v-for="(item, index) in sortedItems"
@@ -589,218 +613,3 @@ onMounted(fetchItems)
     @cancel="showDeleteModal = false"
   />
 </template>
-
-<style scoped>
-.manage-featured {
-  padding: clamp(1rem, 2.5vw, 2rem);
-}
-
-.header-section {
-  background: white;
-  padding: clamp(1rem, 2.5vw, 1.75rem);
-  border: 1px solid #dce3ef;
-  border-radius: 1rem;
-  box-shadow: 0 0.75rem 2rem rgba(25, 42, 78, 0.06);
-  margin-bottom: 1.25rem;
-}
-
-.title-area {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.title-area h2 {
-  color: var(--navy-blue);
-  font-size: clamp(1.35rem, 2vw, 1.75rem);
-  font-weight: 700;
-}
-
-.help-text {
-  color: #5d6b83;
-  font-size: 0.9rem;
-  line-height: 1.55;
-}
-
-.add-item-btn {
-  background: linear-gradient(135deg, #c02a3d, #9f1f31);
-  color: white;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 0.6rem;
-  cursor: pointer;
-  font-weight: 500;
-  transition:
-    filter 180ms ease,
-    box-shadow 220ms ease,
-    transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.add-item-btn:hover {
-  filter: brightness(1.12);
-  box-shadow: 0 0.5rem 1rem rgba(159, 31, 49, 0.25);
-  transform: translateY(-0.125rem);
-}
-
-.add-item-btn:active {
-  transform: translateY(0);
-}
-
-.featured-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
-  gap: 1rem;
-  padding: 0;
-  min-height: 200px;
-  position: relative;
-}
-
-.loading-state,
-.empty-state {
-  text-align: center;
-  padding: 2rem;
-  background: white;
-  border: 1px dashed #c5d1e5;
-  border-radius: 0.85rem;
-  box-shadow: 0 0.5rem 1.5rem rgba(25, 42, 78, 0.04);
-  color: #5d6b83;
-}
-
-.loading-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-}
-
-.spinner {
-  width: 50px;
-  height: 50px;
-  animation: spin 1s linear infinite;
-}
-
-.spinner circle {
-  stroke: currentColor;
-  stroke-dasharray: 150;
-  stroke-dashoffset: 75;
-  transform-origin: center;
-  animation: dash 1.5s ease-in-out infinite;
-}
-
-@keyframes spin {
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes dash {
-  0% {
-    stroke-dashoffset: 125;
-  }
-  50% {
-    stroke-dashoffset: 0;
-  }
-  100% {
-    stroke-dashoffset: -125;
-  }
-}
-
-/* Grid Transitions */
-.grid-move {
-  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.grid-enter-active,
-.grid-leave-active {
-  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.grid-leave-active {
-  position: absolute;
-  width: calc(100% - 1.5rem);
-}
-
-.grid-enter-from,
-.grid-leave-to {
-  opacity: 0;
-  transform: scale(0.95);
-}
-
-/* Smooth width transitions for grid items */
-.featured-grid > * {
-  transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-@media (max-width: 960px) {
-  .manage-featured {
-    padding: 1rem;
-  }
-
-  .header-section {
-    padding: 1rem;
-  }
-
-  .title-area {
-    flex-direction: column;
-    gap: 1rem;
-    align-items: stretch;
-  }
-
-  .title-area h2 {
-    font-size: 1.5rem;
-  }
-
-  .add-item-btn {
-    width: 100%;
-  }
-
-  .featured-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem;
-    padding: 0.75rem;
-  }
-
-  .grid-leave-active {
-    width: calc(100% - 1rem);
-  }
-}
-
-@media (max-width: 600px) {
-  .featured-grid {
-    grid-template-columns: 1fr;
-    padding: 0;
-  }
-}
-
-/* Loading Animation */
-@keyframes loading-pulse {
-  0% {
-    opacity: 0.6;
-  }
-  50% {
-    opacity: 0.8;
-  }
-  100% {
-    opacity: 0.6;
-  }
-}
-
-.loading-state {
-  animation: loading-pulse 1.5s ease-in-out infinite;
-}
-
-/* Empty State Enhancement */
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  padding: 3rem 2rem;
-}
-
-.empty-state p {
-  max-width: 400px;
-  line-height: 1.5;
-}
-</style>

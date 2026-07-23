@@ -121,7 +121,6 @@ useHead(() => {
 </template>
 
 <style>
-@import './assets/fonts.css';
 .app {
   min-height: 100vh;
   font-family: var(--font-primary);

@@ -1,6 +1,9 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { supabase } from '@/lib/supabaseClient'
+import BaseDropdown from '@/components/ui/BaseDropdown.vue'
+import BaseInput from '@/components/ui/BaseInput.vue'
+import ContactSubmissionCard from './ContactSubmissionCard.vue'
 
 const props = defineProps({
   submissions: {
@@ -25,6 +28,36 @@ const statusOptions = {
   in_progress: 'In Progress',
   completed: 'Completed',
   archived: 'Archived',
+}
+const statusDropdownOptions = Object.entries(statusOptions).map(
+  ([value, label]) => ({ value, label }),
+)
+const statusFilterOptions = [
+  { value: 'all', label: 'All' },
+  ...statusDropdownOptions,
+]
+const dateRangeOptions = [
+  { value: 'all', label: 'All Time' },
+  { value: '7days', label: 'Last 7 Days' },
+  { value: '30days', label: 'Last 30 Days' },
+]
+const sortOptions = [
+  { value: 'newest', label: 'Newest First' },
+  { value: 'oldest', label: 'Oldest First' },
+  { value: 'a-z', label: 'Name A-Z' },
+  { value: 'z-a', label: 'Name Z-A' },
+]
+const statusBadgeClasses = {
+  new: 'border-[#c7d2fe] bg-[#eef2ff] text-[#4338ca]',
+  in_progress: 'border-[#fed7aa] bg-[#fff7ed] text-[#c2410c]',
+  completed: 'border-[#a7f3d0] bg-[#ecfdf5] text-[#047857]',
+  archived: 'border-[#d1d5db] bg-[#f3f4f6] text-[#4b5563]',
+}
+const statusOptionClasses = {
+  new: 'bg-[#eef2ff] text-[#4338ca] font-bold',
+  in_progress: 'bg-[#fff7ed] text-[#c2410c] font-bold',
+  completed: 'bg-[#ecfdf5] text-[#047857] font-bold',
+  archived: 'bg-[#f3f4f6] text-[#4b5563] font-bold',
 }
 
 // Update submission status
@@ -99,325 +132,101 @@ const filteredAndSortedSubmissions = computed(() => {
   return filtered
 })
 
-// Format date
-const formatDate = dateString => {
-  return new Date(dateString).toLocaleString()
-}
-
 const emit = defineEmits(['refresh-data'])
 </script>
 
 <template>
-  <div class="contact-submissions">
+  <div class="h-full p-[clamp(1rem,2.5vw,2rem)] max-[960px]:p-4">
     <!-- Filters and Search -->
-    <div class="filters-section">
-      <div class="filters-grid">
-        <div class="filter-group">
-          <label for="status">Status</label>
-          <select id="status" v-model="statusFilter" class="filter-select">
-            <option value="all">All</option>
-            <option
-              v-for="(label, value) in statusOptions"
-              :key="value"
-              :value="value"
-            >
-              {{ label }}
-            </option>
-          </select>
+    <div
+      class="mb-6 rounded-2xl border border-[#dce3ef] bg-white p-[clamp(1rem,2.5vw,1.75rem)] shadow-[0_0.75rem_2rem_rgba(25,42,78,0.06)] max-[960px]:p-4"
+    >
+      <div
+        class="grid grid-cols-[repeat(3,minmax(0,1fr))_minmax(14rem,1.35fr)] gap-4 max-[960px]:grid-cols-2 max-[600px]:grid-cols-1"
+      >
+        <div class="flex flex-col gap-2">
+          <label
+            for="status"
+            class="text-xs font-bold uppercase tracking-[0.06em] text-brand-navy"
+            >Status</label
+          >
+          <BaseDropdown
+            id="status"
+            v-model="statusFilter"
+            :options="statusFilterOptions"
+            :option-classes="statusOptionClasses"
+            full-width
+          />
         </div>
 
-        <div class="filter-group">
-          <label for="date">Date Range</label>
-          <select id="date" v-model="dateRange" class="filter-select">
-            <option value="all">All Time</option>
-            <option value="7days">Last 7 Days</option>
-            <option value="30days">Last 30 Days</option>
-          </select>
+        <div class="flex flex-col gap-2">
+          <label
+            for="date"
+            class="text-xs font-bold uppercase tracking-[0.06em] text-brand-navy"
+            >Date Range</label
+          >
+          <BaseDropdown
+            id="date"
+            v-model="dateRange"
+            :options="dateRangeOptions"
+            full-width
+          />
         </div>
 
-        <div class="filter-group">
-          <label for="sort">Sort By</label>
-          <select id="sort" v-model="sortBy" class="filter-select">
-            <option value="newest">Newest First</option>
-            <option value="oldest">Oldest First</option>
-            <option value="a-z">Name A-Z</option>
-            <option value="z-a">Name Z-A</option>
-          </select>
+        <div class="flex flex-col gap-2">
+          <label
+            for="sort"
+            class="text-xs font-bold uppercase tracking-[0.06em] text-brand-navy"
+            >Sort By</label
+          >
+          <BaseDropdown
+            id="sort"
+            v-model="sortBy"
+            :options="sortOptions"
+            full-width
+          />
         </div>
 
-        <div class="filter-group">
-          <label for="search">Search</label>
-          <input
-            type="text"
+        <div class="flex flex-col gap-2">
+          <label
+            for="search"
+            class="text-xs font-bold uppercase tracking-[0.06em] text-brand-navy"
+            >Search</label
+          >
+          <BaseInput
             id="search"
             v-model="searchQuery"
             placeholder="Search submissions..."
-            class="search-input"
+            full-width
           />
         </div>
       </div>
     </div>
 
     <!-- Submissions List -->
-    <div v-if="loading" class="loading">Loading submissions...</div>
+    <div
+      v-if="loading"
+      class="rounded-[0.85rem] border border-dashed border-[#c5d1e5] bg-white p-8 text-center shadow-[0_0.5rem_1.5rem_rgba(25,42,78,0.04)]"
+    >
+      Loading submissions...
+    </div>
 
     <div
       v-else-if="filteredAndSortedSubmissions.length === 0"
-      class="no-submissions"
+      class="rounded-[0.85rem] border border-dashed border-[#c5d1e5] bg-white p-8 text-center shadow-[0_0.5rem_1.5rem_rgba(25,42,78,0.04)]"
     >
       No submissions found
     </div>
 
-    <div v-else class="submissions-list">
-      <div
+    <div v-else class="grid gap-4">
+      <ContactSubmissionCard
         v-for="submission in filteredAndSortedSubmissions"
         :key="submission.id"
-        class="submission-card"
-      >
-        <div class="submission-header">
-          <div class="submission-title">
-            <h3>{{ submission.name }}</h3>
-            <select
-              v-model="submission.status"
-              @change="updateStatus(submission.id, submission.status)"
-              :class="['status-select', submission.status]"
-            >
-              <option
-                v-for="(label, value) in statusOptions"
-                :key="value"
-                :value="value"
-              >
-                {{ label }}
-              </option>
-            </select>
-          </div>
-          <span class="date">{{ formatDate(submission.created_at) }}</span>
-        </div>
-
-        <div class="submission-details">
-          <p><strong>Email:</strong> {{ submission.email }}</p>
-          <p v-if="submission.phone">
-            <strong>Phone:</strong> {{ submission.phone }}
-          </p>
-          <p class="message">
-            <strong>Message:</strong> {{ submission.message }}
-          </p>
-        </div>
-      </div>
+        :submission="submission"
+        :status-options="statusDropdownOptions"
+        :status-badge-classes="statusBadgeClasses"
+        @status-change="updateStatus"
+      />
     </div>
   </div>
 </template>
-
-<style scoped>
-.contact-submissions {
-  height: 100%;
-  padding: clamp(1rem, 2.5vw, 2rem);
-}
-
-.filters-section {
-  background: white;
-  padding: clamp(1rem, 2.5vw, 1.75rem);
-  border: 1px solid #dce3ef;
-  border-radius: 1rem;
-  box-shadow: 0 0.75rem 2rem rgba(25, 42, 78, 0.06);
-  margin-bottom: 1.5rem;
-}
-
-.filters-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(14rem, 1.35fr);
-  gap: 1rem;
-}
-
-.filter-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.filter-group label {
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--navy-blue);
-}
-
-.filter-select,
-.search-input {
-  min-height: 2.75rem;
-  padding: 0.65rem 0.75rem;
-  border: 1px solid #ccd7ea;
-  border-radius: 0.6rem;
-  background: #fbfcff;
-  font-size: var(--text-base);
-  transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
-}
-
-.filter-select:focus,
-.search-input:focus {
-  border-color: #8fa7d1;
-  background: white;
-  box-shadow: 0 0 0 0.2rem rgba(27, 43, 82, 0.1);
-  outline: none;
-}
-
-.submissions-list {
-  display: grid;
-  gap: 1rem;
-}
-
-.submission-card {
-  background: white;
-  padding: clamp(1rem, 2.5vw, 1.5rem);
-  border: 1px solid #dce3ef;
-  border-left: 0.3rem solid var(--navy-blue);
-  border-radius: 0.85rem;
-  box-shadow: 0 0.5rem 1.5rem rgba(25, 42, 78, 0.05);
-  transition: border-color 180ms ease, box-shadow 220ms ease, transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.submission-card:hover {
-  border-color: #c6d3e8;
-  box-shadow: 0 0.9rem 1.8rem rgba(25, 42, 78, 0.1);
-  transform: translateY(-0.15rem);
-}
-
-.submission-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 1rem;
-}
-
-.submission-title {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.submission-title h3 {
-  color: var(--navy-blue);
-  font-size: 1.1rem;
-  font-weight: 700;
-}
-
-.date {
-  color: var(--steel-gray);
-  font-size: 0.8rem;
-  white-space: nowrap;
-}
-
-.submission-details {
-  display: grid;
-  gap: 0.65rem;
-}
-
-.submission-details p {
-  color: var(--steel-gray);
-}
-
-.submission-details .message {
-  margin-top: 0.35rem;
-  padding: 0.85rem 1rem;
-  border-radius: 0.6rem;
-  background: #f5f8fd;
-  border: 1px solid #e2e9f5;
-  white-space: pre-line;
-}
-
-.status-select {
-  min-height: 2rem;
-  padding: 0.25rem 0.6rem;
-  border-radius: 999px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  border: 1px solid #ccd7ea;
-  cursor: pointer;
-  transition: box-shadow 180ms ease, transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.status-select:hover {
-  box-shadow: 0 0.2rem 0.5rem rgba(25, 42, 78, 0.12);
-  transform: translateY(-0.05rem);
-}
-
-.status-select.new {
-  background-color: #eef2ff;
-  border-color: #c7d2fe;
-  color: #4338ca;
-}
-
-.status-select.in_progress {
-  background-color: #fff7ed;
-  border-color: #fed7aa;
-  color: #c2410c;
-}
-
-.status-select.completed {
-  background-color: #ecfdf5;
-  border-color: #a7f3d0;
-  color: #047857;
-}
-
-.status-select.archived {
-  background-color: #f3f4f6;
-  border-color: #d1d5db;
-  color: #4b5563;
-}
-
-.loading,
-.no-submissions {
-  text-align: center;
-  padding: 2rem;
-  background: white;
-  border: 1px dashed #c5d1e5;
-  border-radius: 0.85rem;
-  box-shadow: 0 0.5rem 1.5rem rgba(25, 42, 78, 0.04);
-}
-
-@media (max-width: 960px) {
-  .contact-submissions {
-    padding: 1rem;
-  }
-
-  .filters-section {
-    padding: 1rem;
-  }
-
-  .filters-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem;
-  }
-
-  .submission-card {
-    padding: 1rem;
-  }
-
-}
-
-@media (max-width: 600px) {
-  .filters-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .submission-header {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .submission-title {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-
-  .status-select {
-    width: 100%;
-  }
-
-  .date {
-    font-size: 0.875rem;
-  }
-}
-</style>
