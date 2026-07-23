@@ -51,92 +51,94 @@ const stockState = computed(() => {
   <article
     class="flex min-h-full flex-col overflow-hidden rounded-panel border border-admin-border bg-admin-panel shadow-card transition-[transform,box-shadow] duration-interaction hover:-translate-y-[0.15rem] hover:shadow-raised motion-reduce:transform-none motion-reduce:transition-none"
   >
-    <div class="flex flex-1 gap-4 p-4 max-[640px]:gap-3">
-      <div
-        class="relative h-[4.25rem] w-[4.25rem] shrink-0 overflow-hidden rounded-button bg-model-placeholder max-[640px]:h-[3.75rem] max-[640px]:w-[3.75rem]"
-      >
-        <img
-          v-if="model.imagePreview"
-          :src="model.imagePreview"
-          :alt="model.display_name"
-          class="h-full w-full object-cover"
-        />
-        <span
-          v-else
-          class="grid h-full w-full place-content-center px-1 text-center font-bold leading-tight text-white"
-          >{{ model.nominal_size
-          }}<small class="text-[0.65rem]">in.</small></span
-        >
-        <span
-          v-if="model.imagePreview"
-          class="absolute inset-x-1 bottom-1 rounded-[0.25rem] bg-brand-navy/85 px-1 py-[0.1rem] text-center text-[0.61rem] font-bold text-white"
-          >{{ model.nominal_size }} in.</span
-        >
+    <div class="flex flex-1 flex-col gap-4 p-4">
+      <div class="grid grid-cols-12 gap-4 max-[640px]:gap-3">
+        <div class="col-span-3">
+          <div
+            class="relative h-[4.25rem] w-full overflow-hidden rounded-button bg-model-placeholder max-[640px]:h-[3.75rem]"
+          >
+            <img
+              v-if="model.imagePreview"
+              :src="model.imagePreview"
+              :alt="model.display_name"
+              class="h-full w-full object-cover"
+            />
+            <span
+              v-else
+              class="grid h-full w-full place-content-center px-1 text-center font-bold leading-tight text-white"
+              >{{ model.nominal_size
+              }}<small class="text-[0.65rem]">in.</small></span
+            >
+            <span
+              v-if="model.imagePreview"
+              class="absolute inset-x-1 bottom-1 rounded-[0.25rem] bg-brand-navy/85 px-1 py-[0.1rem] text-center text-[0.61rem] font-bold text-white"
+              >{{ model.nominal_size }} in.</span
+            >
+          </div>
+        </div>
+
+        <div class="col-span-9 flex min-w-0 flex-col">
+          <h3 class="m-0 text-[1rem] font-bold leading-snug text-brand-navy">
+            <button
+              type="button"
+              class="line-clamp-2 cursor-pointer border-0 bg-transparent p-0 text-left font-[inherit] text-inherit transition-colors duration-interaction hover:text-admin-link focus-visible:rounded-[0.2rem] focus-visible:outline-none focus-visible:shadow-focus-strong motion-reduce:transition-none"
+              :aria-label="`Edit ${model.display_name}`"
+              @click="emit('edit', model)"
+            >
+              {{ model.display_name }}
+            </button>
+          </h3>
+          <p
+            v-if="
+              specifications.length ||
+              model.circulation_type === 'reverse_circulation'
+            "
+            class="mb-0 mt-1 min-h-[1.25rem] text-[0.78rem] text-admin-subtle"
+          >
+            {{ specifications.join(' | ')
+            }}<span
+              v-if="model.circulation_type === 'reverse_circulation'"
+              :class="specifications.length && 'ml-2'"
+              class="inline-block rounded-[0.25rem] bg-admin-danger-tag px-[0.35rem] py-[0.14rem] text-[0.66rem] font-bold text-admin-danger"
+              >R.C.</span
+            >
+          </p>
+          <span v-else class="mt-1 min-h-[1.25rem]"></span>
+          <p
+            v-if="catalogMeta"
+            class="mb-0 mt-1 min-h-[1.1rem] truncate text-[0.75rem] text-admin-muted"
+            :title="catalogMeta"
+          >
+            {{ catalogMeta }}
+          </p>
+          <span v-else class="mt-1 min-h-[1.1rem]"></span>
+        </div>
       </div>
 
-      <div class="flex min-w-0 flex-1 flex-col">
-        <h3
-          class="m-0 min-h-[2.55rem] text-[1rem] font-bold leading-snug text-brand-navy"
-        >
-          <button
-            type="button"
-            class="line-clamp-2 cursor-pointer border-0 bg-transparent p-0 text-left font-[inherit] text-inherit transition-colors duration-interaction hover:text-admin-link focus-visible:rounded-[0.2rem] focus-visible:outline-none focus-visible:shadow-focus-strong motion-reduce:transition-none"
-            :aria-label="`Edit ${model.display_name}`"
-            @click="emit('edit', model)"
+      <div
+        class="flex items-center justify-between gap-3 rounded-control border border-admin-border bg-admin-panel-muted px-3 py-2.5"
+      >
+        <div>
+          <span
+            :class="[
+              'inline-flex rounded-[0.25rem] px-1.5 py-[0.15rem] text-[0.68rem] font-bold',
+              stockState.classes,
+            ]"
+            >{{ stockState.label }}</span
           >
-            {{ model.display_name }}
-          </button>
-        </h3>
-        <p
-          v-if="
-            specifications.length ||
-            model.circulation_type === 'reverse_circulation'
-          "
-          class="mb-0 mt-1 min-h-[1.25rem] text-[0.78rem] text-admin-subtle"
-        >
-          {{ specifications.join(' | ')
-          }}<span
-            v-if="model.circulation_type === 'reverse_circulation'"
-            :class="specifications.length && 'ml-2'"
-            class="inline-block rounded-[0.25rem] bg-admin-danger-tag px-[0.35rem] py-[0.14rem] text-[0.66rem] font-bold text-admin-danger"
-            >R.C.</span
+          <p class="mb-0 mt-1 text-[0.72rem] text-admin-subtle">
+            {{ availabilityLabel }} of {{ unitLabel }}
+          </p>
+        </div>
+        <div class="text-right">
+          <p
+            class="m-0 text-[0.65rem] font-bold uppercase tracking-[0.08em] text-admin-faint"
           >
-        </p>
-        <span v-else class="mt-1 min-h-[1.25rem]"></span>
-        <p
-          v-if="catalogMeta"
-          class="mb-0 mt-1 min-h-[1.1rem] truncate text-[0.75rem] text-admin-muted"
-          :title="catalogMeta"
-        >
-          {{ catalogMeta }}
-        </p>
-        <span v-else class="mt-1 min-h-[1.1rem]"></span>
-
-        <div
-          class="mt-4 flex items-center justify-between gap-3 rounded-control bg-admin-panel-muted px-3 py-2.5"
-        >
-          <div>
-            <span
-              :class="[
-                'inline-flex rounded-[0.25rem] px-1.5 py-[0.15rem] text-[0.68rem] font-bold',
-                stockState.classes,
-              ]"
-              >{{ stockState.label }}</span
-            >
-            <p class="mb-0 mt-1 text-[0.72rem] text-admin-subtle">
-              {{ availabilityLabel }} of {{ unitLabel }}
-            </p>
-          </div>
-          <div class="text-right">
-            <p
-              class="m-0 text-[0.65rem] font-bold uppercase tracking-[0.08em] text-admin-faint"
-            >
-              List price
-            </p>
-            <strong class="whitespace-nowrap text-[1rem] text-brand-navy">{{
-              price
-            }}</strong>
-          </div>
+            List price
+          </p>
+          <strong class="whitespace-nowrap text-[1rem] text-brand-navy">{{
+            price
+          }}</strong>
         </div>
       </div>
     </div>
